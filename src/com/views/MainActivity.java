@@ -1,9 +1,9 @@
 package com.views;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import com.repository.MessageRepository;
 
 public class MainActivity extends Activity {
 
@@ -17,5 +17,7 @@ public class MainActivity extends Activity {
     }
 
     public void openActivity(View view){
+        Intent intent = new Intent(this, GalleryActivity.class);
+        startActivity(intent);
     }
 }
