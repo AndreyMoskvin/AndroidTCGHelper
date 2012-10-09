@@ -2,17 +2,20 @@ package com.views;
 
 import android.app.Activity;
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.View;
-import android.view.ViewParent;
+import android.view.*;
+import android.widget.ImageView;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.IOException;
+import java.io.InputStream;
+
+import static android.graphics.BitmapFactory.decodeStream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,6 +28,7 @@ public class GalleryActivity extends Activity {
 
     private ViewPager mPager;
     private ImageLoader mImageLoader = ImageLoader.getInstance();
+    private String[] mCardImages;
 
     private DisplayImageOptions mOptions;
 
@@ -37,10 +41,8 @@ public class GalleryActivity extends Activity {
                 .cacheInMemory()
                 .build();
 
-        AssetManager manager = getAssets();
-        String[] assets = null;
         try {
-           assets = manager.list("");
+           mCardImages = getAssets().list("");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,46 +57,80 @@ public class GalleryActivity extends Activity {
         super.onStop();    //To change body of overridden methods use File | Settings | File Templates.
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.gallery_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        return super.onMenuItemSelected(featureId, item);
+    }
+
     private class GalleryPagerAdapter extends PagerAdapter {
+        private LayoutInflater mInflater;
+
+        private Bitmap getBitmapFromAsset(String strName) throws IOException
+        {
+            AssetManager assetManager = getAssets();
+
+            InputStream istr = assetManager.open(strName);
+
+            return decodeStream(istr);
+        }
+
+        private GalleryPagerAdapter() {
+            mInflater = getLayoutInflater();
+        }
 
         @Override
         public int getCount() {
-            return 0;  //To change body of implemented methods use File | Settings | File Templates.
+            return mCardImages.length;
         }
 
         @Override
         public void startUpdate(View view) {
-            //To change body of implemented methods use File | Settings | File Templates.
         }
 
         @Override
         public Object instantiateItem(View view, int i) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            final View imageLayout = mInflater.inflate(R.layout.gallery_image_item, null);
+            final ImageView imageView = (ImageView)imageLayout.findViewById(R.id.cardImage);
+
+            String currentImage = mCardImages[i];
+            try {
+                imageView.setImageBitmap(getBitmapFromAsset(currentImage));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            ((ViewPager) view).addView(imageLayout, 0);
+            return imageLayout;
         }
 
         @Override
         public void destroyItem(View view, int i, Object o) {
-            //To change body of implemented methods use File | Settings | File Templates.
+            ((ViewPager) view).removeView((View) o);
         }
 
         @Override
         public void finishUpdate(View view) {
-            //To change body of implemented methods use File | Settings | File Templates.
         }
 
         @Override
         public boolean isViewFromObject(View view, Object o) {
-            return false;  //To change body of implemented methods use File | Settings | File Templates.
+            return view.equals(o);
         }
 
         @Override
         public Parcelable saveState() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return null;
         }
 
         @Override
         public void restoreState(Parcelable parcelable, ClassLoader classLoader) {
-            //To change body of implemented methods use File | Settings | File Templates.
         }
     }
 }
