@@ -1,0 +1,10 @@
+<resources>
+    <item name="someText" type="id"/>
+    <item name="some_text" type="id"/>
+    <item name="textEntrance" type="id"/>
+    <item name="userTextEntrance" type="id"/>
+    <item name="listOfEnteredItems" type="id"/>
+    <item name="showList" type="id"/>
+    <item name="showLisButton" type="id"/>
+    <item name="showListButton" type="id"/>
+</resources>

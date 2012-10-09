@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">test</string>
+    <string name="default_next_text">This is my second layout</string>
+    <string name="text_entrance_label">Login:</string>
+    <string name="text_hint">Login</string>
+    <string name="show_gallery">Show gallery</string>
+    <string name="show_list_button">Show list</string>
+    <string name="descr_image">Image</string>
+    <string name="passwordLabel">Password:</string>
+    <string name="passwordHint">Password</string>
+    <string name="loginButtonTitle">Login</string>
+    <string name="welcomeLabelTitle">Welcome to TCG gallery!</string>
+</resources>
