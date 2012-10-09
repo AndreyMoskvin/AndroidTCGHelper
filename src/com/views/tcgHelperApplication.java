@@ -1,4 +1,4 @@
-package com.example;
+package com.views;
 
 import android.app.Application;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
@@ -13,13 +13,11 @@ import com.repository.MessagesOpenHelper;
  * Time: 4:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class TestApplication extends Application
+public class tcgHelperApplication extends Application
 {
-    private static TestApplication mInstance;
+    private static tcgHelperApplication mInstance;
 
-    private MessagesOpenHelper mHelper;
-
-    public static TestApplication getInstance(){
+    public static tcgHelperApplication getInstance(){
         return  mInstance;
     }
 
@@ -37,11 +35,5 @@ public class TestApplication extends Application
                 .enableLogging() // Not necessary in common
                 .build();
         ImageLoader.getInstance().init(config);
-
-        mHelper = new MessagesOpenHelper(this);
-    }
-
-    public MessagesOpenHelper getHelper() {
-        return mHelper;
     }
 }
