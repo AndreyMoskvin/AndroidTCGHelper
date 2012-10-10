@@ -25,7 +25,8 @@ public final class R {
         public static final int loginButton=0x7f05000f;
         public static final int loginField=0x7f05000c;
         public static final int loginLabel=0x7f05000b;
-        public static final int menu_back=0x7f050011;
+        public static final int menu_next=0x7f050012;
+        public static final int menu_prev=0x7f050011;
         public static final int nextActivityButton=0x7f050010;
         public static final int pager=0x7f050008;
         public static final int passwordField=0x7f05000e;
@@ -52,7 +53,8 @@ public final class R {
         public static final int descr_image=0x7f060005;
         public static final int imageStub=0x7f06000b;
         public static final int loginButtonTitle=0x7f060008;
-        public static final int menu_back_item_title=0x7f06000c;
+        public static final int menu_next_item_title=0x7f06000c;
+        public static final int menu_prev_item_title=0x7f06000d;
         public static final int passwordHint=0x7f060007;
         public static final int passwordLabel=0x7f060006;
         public static final int show_gallery=0x7f060003;

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_back"
-          android:title="@string/menu_back_item_title"
+    <item android:id="@+id/menu_prev"
+          android:title="@string/menu_prev_item_title"
+          android:showAsAction="ifRoom|withText"/>
+    <item android:id="@+id/menu_next"
+          android:title="@string/menu_next_item_title"
           android:showAsAction="ifRoom|withText"/>
 </menu>

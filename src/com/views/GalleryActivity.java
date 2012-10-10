@@ -9,8 +9,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.*;
 import android.widget.ImageView;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,19 +25,12 @@ import static android.graphics.BitmapFactory.decodeStream;
 public class GalleryActivity extends Activity {
 
     private ViewPager mPager;
-    private ImageLoader mImageLoader = ImageLoader.getInstance();
     private String[] mCardImages;
-
-    private DisplayImageOptions mOptions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gallery);
-
-        mOptions = new DisplayImageOptions.Builder()
-                .cacheInMemory()
-                .build();
 
         try {
            mCardImages = getAssets().list("");
@@ -52,12 +43,6 @@ public class GalleryActivity extends Activity {
     }
 
     @Override
-    protected void onStop() {
-        mImageLoader.stop();
-        super.onStop();    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.gallery_menu, menu);
@@ -66,6 +51,20 @@ public class GalleryActivity extends Activity {
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (item.getItemId() == R.id.menu_next){
+            int nextTenPages = mPager.getCurrentItem() + 10;
+            if (nextTenPages < mCardImages.length) {
+                mPager.setCurrentItem(nextTenPages, true);
+            }
+        }
+
+        if (item.getItemId() == R.id.menu_prev){
+            int prevTenPages = mPager.getCurrentItem() - 10;
+            if (prevTenPages >= 0 ) {
+                mPager.setCurrentItem(prevTenPages, true);
+            }
+        }
+
         return super.onMenuItemSelected(featureId, item);
     }
 

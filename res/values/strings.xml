@@ -12,5 +12,6 @@
     <string name="welcomeLabelTitle">Welcome to TCG gallery!</string>
     <string name="tcgImage">TCGImage</string>
     <string name="imageStub">Image #</string>
-    <string name="menu_back_item_title">BACK</string>
+    <string name="menu_next_item_title">>></string>
+    <string name="menu_prev_item_title"><![CDATA[<<]]></string>
 </resources>
