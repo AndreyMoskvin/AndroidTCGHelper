@@ -31,6 +31,7 @@ public class GalleryActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gallery);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         try {
            mCardImages = getAssets().list("");
@@ -51,28 +52,30 @@ public class GalleryActivity extends Activity {
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
-        if (item.getItemId() == R.id.menu_next){
-            int nextTenPages = mPager.getCurrentItem() + 10;
-            if (nextTenPages < mCardImages.length) {
-                mPager.setCurrentItem(nextTenPages, true);
-            }
+        switch (item.getItemId()){
+            case R.id.menu_next:
+                int nextTenPages = mPager.getCurrentItem() + 10;
+                if (nextTenPages < mCardImages.length) {
+                    mPager.setCurrentItem(nextTenPages, true);
+                }
+                return true;
+            case R.id.menu_prev:
+                int prevTenPages = mPager.getCurrentItem() - 10;
+                if (prevTenPages >= 0 ) {
+                    mPager.setCurrentItem(prevTenPages, true);
+                }
+                return true;
+            case android.R.id.home:
+                finish();
+                return true;
         }
-
-        if (item.getItemId() == R.id.menu_prev){
-            int prevTenPages = mPager.getCurrentItem() - 10;
-            if (prevTenPages >= 0 ) {
-                mPager.setCurrentItem(prevTenPages, true);
-            }
-        }
-
-        return super.onMenuItemSelected(featureId, item);
+        return false;
     }
 
     private class GalleryPagerAdapter extends PagerAdapter {
         private LayoutInflater mInflater;
 
-        private Bitmap getBitmapFromAsset(String strName) throws IOException
-        {
+        private Bitmap getBitmapFromAsset(String strName) throws IOException{
             AssetManager assetManager = getAssets();
 
             InputStream istr = assetManager.open(strName);
