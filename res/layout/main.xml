@@ -8,14 +8,17 @@
     <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
+
             <TextView android:id="@+id/welcomeLabel"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content"
                       android:paddingTop="30dp"
-                      android:paddingBottom="50dp"
+                      android:paddingBottom="100dp"
                       android:layout_centerHorizontal="true"
-                      android:text="@string/welcomeLabelTitle" android:textSize="10pt"/>
+                      android:text="@string/welcomeLabelTitle"
+                      android:textSize="10pt"/>
             <TextView  android:id="@+id/loginLabel"
+                    android:visibility="gone"
                     android:layout_width="70dp"
                     android:layout_height="wrap_content"
                     android:paddingTop="10dp"
@@ -23,6 +26,7 @@
                     android:text="@string/text_entrance_label"
                     android:layout_below="@id/welcomeLabel"/>
             <EditText android:id="@+id/loginField"
+                      android:visibility="gone"
                       android:layout_width="fill_parent"
                       android:layout_height="wrap_content"
                       android:hint="@string/text_hint"
@@ -30,32 +34,42 @@
                       android:layout_toRightOf="@id/loginLabel"
                       android:layout_below="@id/welcomeLabel"/>
             <TextView android:id="@+id/passwordLabel"
+                      android:visibility="gone"
                       android:layout_width="70dp"
                       android:layout_height="wrap_content"
                       android:text="@string/passwordLabel"
                       android:layout_marginTop="20dp"
                       android:layout_below="@id/loginLabel"/>
             <EditText android:id="@+id/passwordField"
+                      android:visibility="gone"
                       android:layout_width="fill_parent"
                       android:layout_height="wrap_content"
                       android:layout_below="@id/loginField"
                       android:layout_toRightOf="@id/passwordLabel"
                       android:hint="@string/passwordHint" />
             <Button android:id="@+id/loginButton"
+                    android:visibility="gone"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
                     android:layout_below="@id/passwordField"
                     android:layout_marginTop="20dp"
                     android:text="@string/loginButtonTitle" />
-            <Button android:id="@+id/nextActivityButton"
+            <Button android:id="@+id/showGalleryButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/show_gallery"
                     android:onClick="openActivity"
                     android:layout_gravity="center"
                     android:layout_below="@id/loginButton"
-                    android:layout_centerHorizontal="true" android:layout_marginTop="20dp"/>
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="20dp"/>
+            <Button android:id="@+id/showCards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/show_cards_list"
+                    android:layout_centerHorizontal="true"
+                    android:layout_above="@id/showGalleryButton"/>
     </RelativeLayout>
 </LinearLayout>
 

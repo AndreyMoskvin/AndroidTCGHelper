@@ -1,6 +1,7 @@
 package com.views;
 
 import android.app.Application;
+import com.cards.database.CardsDBOperator;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -16,8 +17,14 @@ public class tcgHelperApplication extends Application
 {
     private static tcgHelperApplication mInstance;
 
+    public CardsDBOperator mDatabaseOperator;
+
     public static tcgHelperApplication getInstance(){
         return  mInstance;
+    }
+
+    public CardsDBOperator getDatabaseOperator() {
+        return mDatabaseOperator;
     }
 
     @Override
@@ -34,5 +41,8 @@ public class tcgHelperApplication extends Application
                 .enableLogging() // Not necessary in common
                 .build();
         ImageLoader.getInstance().init(config);
+    }
+    public void initializeDatabaseWithCallbackHandler(Object handler){
+        mDatabaseOperator = new CardsDBOperator(this, (CardsDBOperator.Callback) handler);
     }
 }

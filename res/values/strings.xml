@@ -3,15 +3,16 @@
     <string name="app_name">TCGHelper</string>
     <string name="text_entrance_label">Login:</string>
     <string name="text_hint">Login</string>
-    <string name="show_gallery">Show gallery</string>
+    <string name="show_gallery">Show cards gallery</string>
     <string name="show_list_button">Show list</string>
     <string name="descr_image">Image</string>
     <string name="passwordLabel">Password:</string>
     <string name="passwordHint">Password</string>
     <string name="loginButtonTitle">Login</string>
-    <string name="welcomeLabelTitle">Welcome to TCG gallery!</string>
+    <string name="welcomeLabelTitle">Welcome to TCG helper!</string>
     <string name="tcgImage">TCGImage</string>
     <string name="imageStub">Image #</string>
     <string name="menu_next_item_title">>></string>
     <string name="menu_prev_item_title"><![CDATA[<<]]></string>
+    <string name="show_cards_list">Show cards list</string>
 </resources>
