@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,6 +24,7 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "TCGCardsDatabase";
     private static final String TABLE_NAME = "cards";
+    private static final String SELECT_ALL_QUERY = "SELECT  * FROM " + TABLE_NAME;
 
     private static final String KEY_ID = "id";
     private GenerateDatabaseTask mAddTask;
@@ -54,11 +58,15 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     }
 
     public boolean databaseIsEmpty(){
-        String countQuery = "SELECT  * FROM " + TABLE_NAME;
         SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
+
+        Cursor cursor = db.rawQuery(SELECT_ALL_QUERY, null);
 
         boolean isEmpty = cursor.getCount() > 0;
+
+        ArrayList<String> keys = new ArrayList<String>();
+        Collections.addAll(keys, cursor.getColumnNames());
+        Card.setAttributeKeys(keys);
 
         cursor.close();
         db.close();
@@ -66,8 +74,24 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         return isEmpty;
     }
 
-    public void getAllCards(){
+    public ArrayList<Card> getAllCards(){
+        ArrayList<Card> cardArrayList = new ArrayList<Card>();
 
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
+
+        if (cursor.moveToFirst()) {
+            do{
+               int columns = cursor.getColumnCount();
+               String[] fields = new String[columns];
+               for (int i=0; i < columns; i++) {
+                    fields[i] = cursor.getString(i);
+               }
+               Card card = new Card(fields);
+               cardArrayList.add(card);
+            }while (cursor.moveToNext());
+        }
+        return cardArrayList;
     }
 
     private class GenerateDatabaseTask extends AsyncTask<List<Card>,Void,Void> {

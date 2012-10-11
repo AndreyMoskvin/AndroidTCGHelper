@@ -13,13 +13,8 @@ import java.util.ArrayList;
  */
 public class Card {
 
-    public static final String KEY_NAME = "name";
-    public static final String KEY_AMOUNT = "amount";
+    private static final String KEY_ID = "id";
     private static final String KEY_SET = "Set";
-    public static final String KEY_NUMBER = "number";
-    public static final String KEY_TYPE = "type";
-    public static final String KEY_COST = "cost";
-    public static final String KEY_RARITY = "rarity";
 
     private ArrayList<Attribute> mAttributes;
     private static ArrayList<String> AttributeKeys;
