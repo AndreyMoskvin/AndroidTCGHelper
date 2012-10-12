@@ -13,33 +13,15 @@ import java.util.ArrayList;
  */
 public class Card {
 
-    private static final String KEY_SET = "Set";
     public static final String KEY_NAME = "name";
 
     private ArrayList<Attribute> mAttributes;
-    private static ArrayList<String> AttributeKeys;
 
-    public static void setAttributeKeys(ArrayList<String> attributeKeys) {
-        AttributeKeys = attributeKeys;
-
-        if (AttributeKeys.contains(KEY_SET)){
-            int indexOfKeySet = AttributeKeys.indexOf(KEY_SET);
-            AttributeKeys.remove(KEY_SET);
-            AttributeKeys.add(indexOfKeySet, "from_set");
-        }
-
-        //TODO: Invalidate database on changes in this keys
-    }
-
-    public static ArrayList<String> getAttributeKeys() {
-        return AttributeKeys;
-    }
-
-    Card(String[] attributes){
+    public Card(ArrayList<String> types,String[] attributes){
         mAttributes = new ArrayList<Attribute>();
 
         for (int i=0; i < attributes.length; i++) {
-            addAttribute(AttributeKeys.get(i) , attributes[i]);
+            addAttribute(types.get(i) , attributes[i]);
         }
     }
     public void addAttribute(String type, String value){
@@ -66,25 +48,12 @@ public class Card {
         ContentValues values = new ContentValues();
 
         for (Attribute attribute : mAttributes){
-            values.put(attribute.getType(), attribute.getValue());
+            if (!attribute.getType().equals("id")) {
+                values.put(attribute.getType(), attribute.getValue());
+            }
         }
 
         return values;
-    }
-
-    public static String keyTypeTable() {
-        String result = "";
-        if (!AttributeKeys.isEmpty()) {
-            String sqlType = " TEXT,";
-            for (String type : AttributeKeys) {
-                if (AttributeKeys.indexOf(type) == AttributeKeys.size() - 1) {
-                    sqlType = " TEXT";
-                }
-
-                result = result + type.toLowerCase() + sqlType;
-            }
-        }
-        return result;
     }
 
     private class Attribute {

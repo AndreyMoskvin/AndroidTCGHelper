@@ -5,15 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
-import com.cards.database.CardsGenerator;
 import com.cards.database.CardsDBOperator;
-
-import java.io.IOException;
-import java.util.List;
 
 public class MainActivity extends Activity implements CardsDBOperator.Callback {
 
-    private tcgHelperApplication mApplication = tcgHelperApplication.getInstance();
+    private TCGHelperApplication mApplication = TCGHelperApplication.getInstance();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -23,7 +19,7 @@ public class MainActivity extends Activity implements CardsDBOperator.Callback {
 
         mApplication.initializeDatabaseWithCallbackHandler(this);
 
-        if (!mApplication.getDatabaseOperator().databaseIsEmpty()) {
+        if (!mApplication.getDatabaseOperator().hasData()) {
             generateDatabase();
         }
     }
@@ -40,14 +36,7 @@ public class MainActivity extends Activity implements CardsDBOperator.Callback {
 
     private void generateDatabase(){
         Toast.makeText(this, "Adding cards to database...", Toast.LENGTH_SHORT).show();
-        try {
-            CardsGenerator cardsGenerator = new CardsGenerator(getAssets().open("MyDatabase.csv"));
-            List cards = cardsGenerator.generateCards();
-
-            mApplication.getDatabaseOperator().addCards(cards);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mApplication.getDatabaseOperator().addCards();
     }
 
     public void databaseGenerationFinished(Boolean success, int itemsAdded) {

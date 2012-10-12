@@ -7,9 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,22 +25,21 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     private static final String TABLE_NAME = "cards";
     private static final String SELECT_ALL_QUERY = "SELECT  * FROM " + TABLE_NAME;
 
-    private static final String KEY_ID = "id";
     private GenerateDatabaseTask mAddTask;
-    private ArrayList<Card> mAllCards;
     private Callback mCallback;
+    private CardsGenerator mCardGenerator;
+    private ArrayList<Card> mCards = new ArrayList<Card>();
 
-    public CardsDBOperator(Context context, Callback callback) {
+    public CardsDBOperator(Context context, Callback callback, InputStream sourceStream) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mAddTask = new GenerateDatabaseTask();
         mCallback = callback;
+        mCardGenerator = new CardsGenerator(sourceStream);
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String CREATE_CARDS_TABLE = "CREATE TABLE " + TABLE_NAME + "("
-                + KEY_ID + " INTEGER PRIMARY KEY," +
-                Card.keyTypeTable() + ")";
+        String CREATE_CARDS_TABLE = "CREATE TABLE " + TABLE_NAME + "(" + mCardGenerator.getSqlColumns()+ ")";
         sqLiteDatabase.execSQL(CREATE_CARDS_TABLE);
     }
 
@@ -52,56 +50,44 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         onCreate(sqLiteDatabase);
     }
 
-    public void addCards(List<Card> cards){
+    public void addCards(){
+        List<Card> cards = mCardGenerator.generateCards();
         if (cards != null) {
             mAddTask.execute(cards, null, null);
         }
     }
 
-    public boolean databaseIsEmpty(){
+    public boolean hasData(){
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor cursor = db.rawQuery(SELECT_ALL_QUERY, null);
 
-        boolean isEmpty = cursor.getCount() > 0;
-
-        ArrayList<String> keys = new ArrayList<String>();
-        Collections.addAll(keys, cursor.getColumnNames());
-        Card.setAttributeKeys(keys);
-
-        cursor.close();
-        db.close();
-
-        return isEmpty;
+        return cursor.getCount() > 0;
     }
 
     public ArrayList<Card> getAllCards(){
-        if (mAllCards == null)
-        {
-            ArrayList<Card> cardArrayList = new ArrayList<Card>();
+        ArrayList<Card> cardArrayList = new ArrayList<Card>();
 
-            SQLiteDatabase database = getReadableDatabase();
-            Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
 
-            if (cursor.moveToFirst()) {
-                do{
-                   int columns = cursor.getColumnCount();
-                   String[] fields = new String[columns];
-                   for (int i=0; i < columns; i++) {
-                        fields[i] = cursor.getString(i);
-                   }
-                   Card card = new Card(fields);
-                   cardArrayList.add(card);
-                }while (cursor.moveToNext());
-            }
-            mAllCards = cardArrayList;
+        if (cursor.moveToFirst()) {
+            do{
+                int columns = cursor.getColumnCount();
+                String[] fields = new String[columns];
+                for (int i=0; i < columns; i++) {
+                    fields[i] = cursor.getString(i);
+                }
+                Card card = new Card(mCardGenerator.getCardParameters(), fields);
+                cardArrayList.add(card);
+            }while (cursor.moveToNext());
         }
-        return mAllCards;
+        mCards = cardArrayList;
+        return mCards;
     }
 
     private class GenerateDatabaseTask extends AsyncTask<List<Card>,Void,Void> {
-
-        private int mCardsCount;
+        private  int mAddedCardsCount;
         @Override
         protected Void doInBackground(List<Card>... lists) {
             List<Card> cards = lists[0];
@@ -112,9 +98,9 @@ public class CardsDBOperator extends SQLiteOpenHelper{
                 ContentValues values = card.toContentValues();
                 database.insert(TABLE_NAME, null, values);
             }
-
-            mCardsCount = cards.size();
             database.close();
+
+            mAddedCardsCount = cards.size();
 
             return null;
         }
@@ -122,7 +108,7 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         @Override
         protected void onPostExecute(Void aVoid) {
             if(mCallback != null) {
-                mCallback.databaseGenerationFinished(true,mCardsCount);
+                mCallback.databaseGenerationFinished(true, mAddedCardsCount);
             }
             super.onPostExecute(aVoid);
         }

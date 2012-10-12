@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -29,7 +28,7 @@ public class CardsListActivity extends Activity {
         setContentView(R.layout.card_list);
         getActionBar().hide();
 
-        mCardArrayList = tcgHelperApplication.getInstance().getDatabaseOperator().getAllCards();
+        mCardArrayList = TCGHelperApplication.getInstance().getDatabaseOperator().getAllCards();
 
         ListView listView = (ListView)findViewById(R.id.cardListView);
         listView.setAdapter(new CardItemAdapter());

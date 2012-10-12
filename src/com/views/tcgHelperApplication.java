@@ -6,6 +6,9 @@ import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Created with IntelliJ IDEA.
  * User: andrey.moskvin
@@ -13,13 +16,13 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
  * Time: 4:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class tcgHelperApplication extends Application
+public class TCGHelperApplication extends Application
 {
-    private static tcgHelperApplication mInstance;
+    private static TCGHelperApplication mInstance;
 
     public CardsDBOperator mDatabaseOperator;
 
-    public static tcgHelperApplication getInstance(){
+    public static TCGHelperApplication getInstance(){
         return  mInstance;
     }
 
@@ -43,6 +46,11 @@ public class tcgHelperApplication extends Application
         ImageLoader.getInstance().init(config);
     }
     public void initializeDatabaseWithCallbackHandler(Object handler){
-        mDatabaseOperator = new CardsDBOperator(this, (CardsDBOperator.Callback) handler);
+        try {
+            InputStream stream =  getAssets().open("MyDatabase.csv");
+            mDatabaseOperator = new CardsDBOperator(this, (CardsDBOperator.Callback) handler, stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
