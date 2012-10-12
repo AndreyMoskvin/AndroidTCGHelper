@@ -14,6 +14,8 @@ import java.util.ArrayList;
 public class Card {
 
     public static final String KEY_NAME = "name";
+    public static final String KEY_COST = "cost";
+    public static final String KEY_TYPE = "type";
 
     private ArrayList<Attribute> mAttributes;
 

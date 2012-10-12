@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent">
     <TextView android:id="@+id/cardNameLabel"
+              android:layout_width="280dp"
+              android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+              android:singleLine="true"
+              android:text="@string/cardNameLabelStubText"
+              android:textSize="25dp"/>
+    <TextView android:id="@+id/cardTypeLabel"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_marginLeft="20dp"
-              android:text="@string/cardNameLabelStubText" android:textSize="25dp"/>
-</LinearLayout>
+              android:text="@string/cardTypeLabelStubText"
+              android:layout_below="@id/cardNameLabel"/>
+    <TextView android:id="@+id/cardCostLabel"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginRight="30dp"
+              android:layout_alignParentRight="true"
+              android:text="@string/cardTypeLabelCostStubText"
+              android:textSize="25dp"/>
+</RelativeLayout>

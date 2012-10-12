@@ -16,4 +16,6 @@
     <string name="menu_prev_item_title"><![CDATA[<<]]></string>
     <string name="show_cards_list">Show cards list</string>
     <string name="cardNameLabelStubText">Name</string>
+    <string name="cardTypeLabelStubText">Type</string>
+    <string name="cardTypeLabelCostStubText">Cost</string>
 </resources>

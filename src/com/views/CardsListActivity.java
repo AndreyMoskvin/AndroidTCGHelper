@@ -37,7 +37,9 @@ public class CardsListActivity extends Activity {
     private class CardItemAdapter extends BaseAdapter {
 
         private class ViewHolder {
-            public TextView text;
+            public TextView name;
+            public TextView cost;
+            public TextView type;
         }
 
         @Override
@@ -62,14 +64,18 @@ public class CardsListActivity extends Activity {
             if (view == null) {
                 convertView = getLayoutInflater().inflate(R.layout.card_list_item, null);
                 holder = new ViewHolder();
-                holder.text = (TextView) convertView.findViewById(R.id.cardNameLabel);
+                holder.name = (TextView) convertView.findViewById(R.id.cardNameLabel);
+                holder.cost = (TextView) convertView.findViewById(R.id.cardCostLabel);
+                holder.type = (TextView) convertView.findViewById(R.id.cardTypeLabel);
                 convertView.setTag(holder);
             }
             else {
                 holder = (ViewHolder)convertView.getTag();
             }
 
-            holder.text.setText(mCardArrayList.get(i).getValueFromAttributeType(Card.KEY_NAME));
+            holder.name.setText(mCardArrayList.get(i).getValueFromAttributeType(Card.KEY_NAME));
+            holder.cost.setText(mCardArrayList.get(i).getValueFromAttributeType(Card.KEY_COST));
+            holder.type.setText(mCardArrayList.get(i).getValueFromAttributeType(Card.KEY_TYPE));
 
             return convertView;
         }

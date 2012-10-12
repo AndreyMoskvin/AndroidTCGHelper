@@ -20,20 +20,22 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int cardImage=0x7f05000b;
+        public static final int cardCostLabel=0x7f05000b;
+        public static final int cardImage=0x7f05000d;
         public static final int cardListView=0x7f050008;
         public static final int cardNameLabel=0x7f050009;
+        public static final int cardTypeLabel=0x7f05000a;
         public static final int listOfEnteredItems=0x7f050004;
-        public static final int loginButton=0x7f050011;
-        public static final int loginField=0x7f05000e;
-        public static final int loginLabel=0x7f05000d;
-        public static final int menu_next=0x7f050015;
-        public static final int menu_prev=0x7f050014;
-        public static final int pager=0x7f05000a;
-        public static final int passwordField=0x7f050010;
-        public static final int passwordLabel=0x7f05000f;
-        public static final int showCards=0x7f050013;
-        public static final int showGalleryButton=0x7f050012;
+        public static final int loginButton=0x7f050013;
+        public static final int loginField=0x7f050010;
+        public static final int loginLabel=0x7f05000f;
+        public static final int menu_next=0x7f050017;
+        public static final int menu_prev=0x7f050016;
+        public static final int pager=0x7f05000c;
+        public static final int passwordField=0x7f050012;
+        public static final int passwordLabel=0x7f050011;
+        public static final int showCards=0x7f050015;
+        public static final int showGalleryButton=0x7f050014;
         public static final int showLisButton=0x7f050006;
         public static final int showList=0x7f050005;
         public static final int showListButton=0x7f050007;
@@ -41,7 +43,7 @@ public final class R {
         public static final int some_text=0x7f050001;
         public static final int textEntrance=0x7f050002;
         public static final int userTextEntrance=0x7f050003;
-        public static final int welcomeLabel=0x7f05000c;
+        public static final int welcomeLabel=0x7f05000e;
     }
     public static final class layout {
         public static final int card_list=0x7f030000;
@@ -56,6 +58,8 @@ public final class R {
     public static final class string {
         public static final int app_name=0x7f060000;
         public static final int cardNameLabelStubText=0x7f06000f;
+        public static final int cardTypeLabelCostStubText=0x7f060011;
+        public static final int cardTypeLabelStubText=0x7f060010;
         public static final int descr_image=0x7f060005;
         public static final int imageStub=0x7f06000b;
         public static final int loginButtonTitle=0x7f060008;
