@@ -15,10 +15,10 @@ import java.util.List;
  * Time: 4:37 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CardGenerator {
+public class CardsGenerator {
     private CardsParser mParser;
 
-    public CardGenerator(InputStream stream) {
+    public CardsGenerator(InputStream stream) {
         try {
             mParser = new CardsParser(stream);
         } catch (FileNotFoundException e) {

@@ -28,6 +28,7 @@ public class CardsDBOperator extends SQLiteOpenHelper{
 
     private static final String KEY_ID = "id";
     private GenerateDatabaseTask mAddTask;
+    private ArrayList<Card> mAllCards;
     private Callback mCallback;
 
     public CardsDBOperator(Context context, Callback callback) {
@@ -75,23 +76,27 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     }
 
     public ArrayList<Card> getAllCards(){
-        ArrayList<Card> cardArrayList = new ArrayList<Card>();
+        if (mAllCards == null)
+        {
+            ArrayList<Card> cardArrayList = new ArrayList<Card>();
 
-        SQLiteDatabase database = getReadableDatabase();
-        Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
+            SQLiteDatabase database = getReadableDatabase();
+            Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
 
-        if (cursor.moveToFirst()) {
-            do{
-               int columns = cursor.getColumnCount();
-               String[] fields = new String[columns];
-               for (int i=0; i < columns; i++) {
-                    fields[i] = cursor.getString(i);
-               }
-               Card card = new Card(fields);
-               cardArrayList.add(card);
-            }while (cursor.moveToNext());
+            if (cursor.moveToFirst()) {
+                do{
+                   int columns = cursor.getColumnCount();
+                   String[] fields = new String[columns];
+                   for (int i=0; i < columns; i++) {
+                        fields[i] = cursor.getString(i);
+                   }
+                   Card card = new Card(fields);
+                   cardArrayList.add(card);
+                }while (cursor.moveToNext());
+            }
+            mAllCards = cardArrayList;
         }
-        return cardArrayList;
+        return mAllCards;
     }
 
     private class GenerateDatabaseTask extends AsyncTask<List<Card>,Void,Void> {

@@ -3,7 +3,7 @@
           package="com.views"
           android:versionCode="1"
           android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="16"/>
+    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="11"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -16,7 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".GalleryActivity"
-                  android:screenOrientation="portrait" />
+        <activity android:name=".CardGalleryActivity"
+                  android:screenOrientation="portrait"/>
+        <activity android:name=".CardsListActivity"
+                  android:screenOrientation="portrait"/>
     </application>
 </manifest>

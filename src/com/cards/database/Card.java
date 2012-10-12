@@ -13,8 +13,8 @@ import java.util.ArrayList;
  */
 public class Card {
 
-    private static final String KEY_ID = "id";
     private static final String KEY_SET = "Set";
+    public static final String KEY_NAME = "name";
 
     private ArrayList<Attribute> mAttributes;
     private static ArrayList<String> AttributeKeys;
@@ -53,8 +53,13 @@ public class Card {
         }
     }
 
-    public ArrayList<Attribute> getAttributes() {
-        return mAttributes;
+    public String getValueFromAttributeType(String type){
+        for (Attribute attribute : mAttributes) {
+            if (attribute.getType().equals(type)) {
+                return attribute.getValue();
+            }
+        }
+        return null;
     }
 
     public ContentValues toContentValues(){

@@ -7,7 +7,8 @@
               android:paddingRight="16dp">
     <RelativeLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            android:gravity="center_vertical">
 
             <TextView android:id="@+id/welcomeLabel"
                       android:layout_width="wrap_content"
@@ -69,7 +70,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/show_cards_list"
                     android:layout_centerHorizontal="true"
-                    android:layout_above="@id/showGalleryButton"/>
+                    android:layout_above="@id/showGalleryButton"
+                    android:onClick="openListActivity"/>
     </RelativeLayout>
 </LinearLayout>
 

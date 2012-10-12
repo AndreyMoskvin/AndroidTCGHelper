@@ -15,4 +15,5 @@
     <string name="menu_next_item_title">>></string>
     <string name="menu_prev_item_title"><![CDATA[<<]]></string>
     <string name="show_cards_list">Show cards list</string>
+    <string name="cardNameLabelStubText">Name</string>
 </resources>

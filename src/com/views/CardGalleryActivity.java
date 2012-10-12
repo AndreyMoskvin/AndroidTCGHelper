@@ -22,7 +22,7 @@ import static android.graphics.BitmapFactory.decodeStream;
  * Time: 11:46 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GalleryActivity extends Activity {
+public class CardGalleryActivity extends Activity {
 
     private ViewPager mPager;
     private String[] mCardImages;
