@@ -21,19 +21,25 @@ import java.util.ArrayList;
  * Time: 9:30 AM
  * To change this template use File | Settings | File Templates.
  */
-public class CardsListActivity extends Activity {
+public class CardsListActivity extends Activity{
 
-    private ArrayList<Card> mCardArrayList;
+    private CardItemAdapter mCardItemAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.card_list);
 
-        mCardArrayList = TCGHelperApplication.getInstance().getDatabaseOperator().getAllyCards();
-
         ListView listView = (ListView)findViewById(R.id.cardListView);
-        listView.setAdapter(new CardItemAdapter());
+        mCardItemAdapter = new CardItemAdapter(TCGHelperApplication.getInstance().getDatabaseOperator().getCards());
+        listView.setAdapter(mCardItemAdapter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        mCardItemAdapter.setCardArrayList(TCGHelperApplication.getInstance().getDatabaseOperator().getCards());
     }
 
     @Override
@@ -47,6 +53,7 @@ public class CardsListActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuFilterOptionsButton:
+                TCGHelperApplication.getInstance().getDatabaseOperator().resetFilters();
                 Intent intent = new Intent(this, FilterActivity.class);
                 startActivity(intent);
                 return true;
@@ -56,6 +63,17 @@ public class CardsListActivity extends Activity {
     }
 
     private class CardItemAdapter extends BaseAdapter {
+
+        private ArrayList<Card> mCardArrayList;
+
+        public void setCardArrayList(ArrayList<Card> mCardArrayList) {
+            this.mCardArrayList = mCardArrayList;
+            this.notifyDataSetChanged();
+        }
+
+        private CardItemAdapter(ArrayList<Card> mCardArrayList) {
+            this.mCardArrayList = mCardArrayList;
+        }
 
         private class ViewHolder {
             public TextView name;

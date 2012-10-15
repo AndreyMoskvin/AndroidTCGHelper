@@ -8,8 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,20 +24,35 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     private static final String TABLE_NAME = "cards";
     private static final String SELECT_ALL_QUERY = "SELECT  * FROM " + TABLE_NAME;
 
-    private static final String KEY_NAME = "name";
-    private static final String KEY_COST = "cost";
-    private static final String KEY_TYPE = "type";
-
-    private GenerateDatabaseTask mAddTask;
+    private FillDatabaseTask mAddTask;
     private Callback mCallback;
     private CardsGenerator mCardGenerator;
     private ArrayList<Card> mCards = new ArrayList<Card>();
+    private FilterBuilder mFilterBuilder;
+
+    public static final String KEY_NAME = "name";
+    public static final String KEY_COST = "cost";
+    public static final String KEY_TYPE = "type";
+    public static final String KEY_SET = "from_set";
+    public static final String KEY_RARITY = "rarity";
+
+    private static final String FILTER_ALL= "All";
+    private ArrayList<String> mCardTypes;
+    private ArrayList<String> mCardCosts;
+    private ArrayList<String> mCardSets;
+    private ArrayList<String> mCardRarity;
 
     public CardsDBOperator(Context context, Callback callback, InputStream sourceStream) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        mAddTask = new GenerateDatabaseTask();
+        mAddTask = new FillDatabaseTask();
         mCallback = callback;
         mCardGenerator = new CardsGenerator(sourceStream);
+        mFilterBuilder = new FilterBuilder();
+        mFilterBuilder.build();
+        mCardTypes = new ArrayList<String>();
+        mCardCosts = new ArrayList<String>();
+        mCardSets = new ArrayList<String>();
+        mCardRarity = new ArrayList<String>();
     }
 
     @Override
@@ -54,11 +68,49 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         onCreate(sqLiteDatabase);
     }
 
-    public void addCards(){
-        List<Card> cards = mCardGenerator.generateCards();
-        if (cards != null) {
-            mAddTask.execute(cards, null, null);
+    private ArrayList<Card>cardsFromCursor(Cursor cursor){
+        ArrayList<Card> cardArrayList = new ArrayList<Card>();
+
+        if (cursor.moveToFirst()) {
+            do{
+                int columns = cursor.getColumnCount();
+                String[] fields = new String[columns];
+                for (int i=0; i < columns; i++) {
+                    fields[i] = cursor.getString(i);
+                }
+                Card card = new Card(mCardGenerator.getCardParameters(), fields);
+                cardArrayList.add(card);
+            }while (cursor.moveToNext());
         }
+
+        return cardArrayList;
+    }
+
+    public ArrayList<Card> getCards(){
+        if(!mFilterBuilder.isEmpty()){
+            SQLiteDatabase database = getReadableDatabase();
+
+            Cursor cursor = database.query(TABLE_NAME, mCardGenerator.getStringCardParameters(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray(), null, null, null, null);
+
+            mCards = cardsFromCursor(cursor);
+            return mCards;
+        } else {
+            return getAllCards();
+        }
+    }
+
+    private ArrayList<String> getFilterValuesForType(String type){
+        Set<String> uniqueTypesSet = new HashSet<String>();
+        for (Card card : mCards){
+            String value = card.getValueFromAttributeType(type);
+            uniqueTypesSet.add(value);
+        }
+
+        ArrayList<String> result = new ArrayList<String>();
+        result.addAll(uniqueTypesSet);
+        result.add(0, FILTER_ALL);
+
+        return result;
     }
 
     public boolean hasData(){
@@ -69,68 +121,101 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         return cursor.getCount() > 0;
     }
 
-    public ArrayList<Card> getAllCards(){
-        ArrayList<Card> cardArrayList = new ArrayList<Card>();
-
+    private ArrayList<Card> getAllCards(){
         SQLiteDatabase database = getReadableDatabase();
         Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
 
-        if (cursor.moveToFirst()) {
-            do{
-                int columns = cursor.getColumnCount();
-                String[] fields = new String[columns];
-                for (int i=0; i < columns; i++) {
-                    fields[i] = cursor.getString(i);
-                }
-                Card card = new Card(mCardGenerator.getCardParameters(), fields);
-                cardArrayList.add(card);
-            }while (cursor.moveToNext());
-        }
-        mCards = cardArrayList;
+        mCards = cardsFromCursor(cursor);
         return mCards;
     }
 
-    private ArrayList<Card> getCardsByKey(String sqlColumn, String type){
-        ArrayList<Card> cardArrayList = new ArrayList<Card>();
+    public List<String> getCardTypes(){
+        if (mCardTypes.isEmpty()){
+            mCardTypes = getFilterValuesForType(KEY_TYPE);
+        }
+        return mCardTypes;
+    }
+    public List<String> getCardCosts(){
+        if (mCardCosts.isEmpty()){
+            mCardCosts = getFilterValuesForType(KEY_COST);
+        }
+        return mCardCosts;
+    }
+    public List<String> getCardSets(){
+        if (mCardSets.isEmpty()){
+            mCardSets = getFilterValuesForType(KEY_SET);
+        }
+        return mCardSets;
+    }
+    public List<String> getCardRarity(){
+        if (mCardRarity.isEmpty()){
+            mCardRarity = getFilterValuesForType(KEY_RARITY);
+        }
+        return mCardRarity;
+    }
 
-        SQLiteDatabase database = getReadableDatabase();
+    public void addCards(){
+        List<Card> cards = mCardGenerator.generateCards();
+        if (cards != null) {
+            mAddTask.execute(cards, null, null);
+        }
+    }
 
-        String[] cardParams = mCardGenerator.getStringCardParameters();
+    public void addFilter(String key, String value){
+        mFilterBuilder.addFilters(key, value);
+        mFilterBuilder.build();
+    }
+    public void resetFilters(){
+        mFilterBuilder.reset();
+    }
 
-        Cursor cursor = database.query(TABLE_NAME, cardParams, sqlColumn + " = ?", new String[] { type }, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            do{
-                int columns = cursor.getColumnCount();
-                String[] fields = new String[columns];
-                for (int i=0; i < columns; i++) {
-                    fields[i] = cursor.getString(i);
-                }
-                Card card = new Card(mCardGenerator.getCardParameters(), fields);
-                cardArrayList.add(card);
-            }while (cursor.moveToNext());
+    private class FilterBuilder{
+        private HashMap<String, String> mFilters;
+        private String mSqlFilterString;
+
+        public Boolean isEmpty(){
+            return mFilters.isEmpty();
         }
 
-        mCards = cardArrayList;
-        return mCards;
+        public String getFilterString() {
+            return mSqlFilterString;
+        }
+
+        public String[] getSqlFilterValuesArray(){
+            return mFilters.values().toArray(new String[mFilters.size()]);
+        }
+
+        private FilterBuilder() {
+            mFilters = new HashMap<String, String>();
+        }
+
+        public void addFilters(String key, String value){
+            if (!value.equals(FILTER_ALL))
+                mFilters.put(key, value);
+        }
+
+        public void build(){
+            mSqlFilterString = SELECT_ALL_QUERY;
+            if (!mFilters.isEmpty()){
+                StringBuilder builder = new StringBuilder();
+                String separator = " AND ";
+
+                builder.append("( ");
+                for (String key : mFilters.keySet()){
+                    builder.append(key).append(" = ? ").append(separator);
+                }
+                builder.setLength(builder.length() - separator.length());
+                builder.append(" )");
+                mSqlFilterString = builder.toString();
+            }
+        }
+
+        public void reset(){
+            mFilters.clear();
+        }
     }
 
-    public ArrayList<Card> getAllyCards(){
-        return getCardsByKey(KEY_TYPE, "Ally");
-    }
-
-    public ArrayList<Card> getQuestCards(){
-        return getCardsByKey(KEY_TYPE, "Quest");
-    }
-
-    public ArrayList<Card> getEquipmentCards(){
-        return getCardsByKey(KEY_TYPE, "Equipment");
-    }
-
-    public ArrayList<Card> getAbilityCards(){
-        return getCardsByKey(KEY_TYPE, "Ability");
-    }
-
-    private class GenerateDatabaseTask extends AsyncTask<List<Card>,Void,Void> {
+    private class FillDatabaseTask extends AsyncTask<List<Card>,Void,Void> {
         private  int mAddedCardsCount;
         @Override
         protected Void doInBackground(List<Card>... lists) {
@@ -155,6 +240,7 @@ public class CardsDBOperator extends SQLiteOpenHelper{
                 mCallback.databaseGenerationFinished(true, mAddedCardsCount);
             }
             super.onPostExecute(aVoid);
+
         }
     }
     public static interface Callback{

@@ -22,7 +22,7 @@ public class Card {
             addAttribute(types.get(i) , attributes[i]);
         }
     }
-    public void addAttribute(String type, String value){
+    private void addAttribute(String type, String value){
         Attribute attribute = new Attribute(type,value);
         if (!mAttributes.contains(attribute)) {
             mAttributes.add(attribute);
