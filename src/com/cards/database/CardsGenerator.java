@@ -23,7 +23,7 @@ public class CardsGenerator {
     public CardsGenerator(InputStream stream) {
         try {
             mParser = new CardsParser(stream);
-            mSqlColumns = mParser.getSqlColumns();
+            mSqlColumns = mParser.getSqlFields();
             Collections.addAll(mCardParameters, mParser.getParameters());
 
             mCardParametersWithoutId = (ArrayList<String>) mCardParameters.clone();
@@ -39,6 +39,10 @@ public class CardsGenerator {
 
     public ArrayList<String> getCardParameters(){
         return mCardParameters;
+    }
+
+    public String[] getStringCardParameters(){
+        return mCardParameters.toArray(new String[mCardParameters.size()]);
     }
 
     public List<Card> generateCards(){

@@ -31,7 +31,6 @@ public class CardGalleryActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gallery);
-        getActionBar().setDisplayHomeAsUpEnabled(true);
 
         try {
            mCardImages = getAssets().list("");
@@ -49,6 +48,7 @@ public class CardGalleryActivity extends Activity {
         inflater.inflate(R.menu.gallery_menu, menu);
         return true;
     }
+
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {

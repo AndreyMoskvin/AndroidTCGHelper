@@ -48,7 +48,7 @@ public class CardsParser {
         return mParameters.toArray(new String[mParameters.size()]);
     }
 
-    public String getSqlColumns(){
+    public String getSqlFields(){
         String result = KEY_ID + " INTEGER PRIMARY KEY,";
         String sqlType = " TEXT,";
         for (int i=1; i< mParameters.size(); i++) {

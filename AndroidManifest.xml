@@ -20,5 +20,7 @@
                   android:screenOrientation="portrait"/>
         <activity android:name=".CardsListActivity"
                   android:screenOrientation="portrait"/>
+        <activity android:name=".FilterActivity"
+                  android:screenOrientation="portrait"/>
     </application>
 </manifest>

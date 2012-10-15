@@ -1,7 +1,10 @@
 package com.views;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -26,12 +29,30 @@ public class CardsListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.card_list);
-        getActionBar().hide();
 
-        mCardArrayList = TCGHelperApplication.getInstance().getDatabaseOperator().getAllCards();
+        mCardArrayList = TCGHelperApplication.getInstance().getDatabaseOperator().getAllyCards();
 
         ListView listView = (ListView)findViewById(R.id.cardListView);
         listView.setAdapter(new CardItemAdapter());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.list_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menuFilterOptionsButton:
+                Intent intent = new Intent(this, FilterActivity.class);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private class CardItemAdapter extends BaseAdapter {
@@ -73,9 +94,9 @@ public class CardsListActivity extends Activity {
                 holder = (ViewHolder)convertView.getTag();
             }
 
-            holder.name.setText(mCardArrayList.get(i).getValueFromAttributeType(Card.KEY_NAME));
-            holder.cost.setText(mCardArrayList.get(i).getValueFromAttributeType(Card.KEY_COST));
-            holder.type.setText(mCardArrayList.get(i).getValueFromAttributeType(Card.KEY_TYPE));
+            holder.name.setText(mCardArrayList.get(i).getValueFromAttributeType("name"));
+            holder.cost.setText(mCardArrayList.get(i).getValueFromAttributeType("cost"));
+            holder.type.setText(mCardArrayList.get(i).getValueFromAttributeType("type"));
 
             return convertView;
         }

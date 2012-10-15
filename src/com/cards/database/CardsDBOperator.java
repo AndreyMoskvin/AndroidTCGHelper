@@ -25,6 +25,10 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     private static final String TABLE_NAME = "cards";
     private static final String SELECT_ALL_QUERY = "SELECT  * FROM " + TABLE_NAME;
 
+    private static final String KEY_NAME = "name";
+    private static final String KEY_COST = "cost";
+    private static final String KEY_TYPE = "type";
+
     private GenerateDatabaseTask mAddTask;
     private Callback mCallback;
     private CardsGenerator mCardGenerator;
@@ -84,6 +88,46 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         }
         mCards = cardArrayList;
         return mCards;
+    }
+
+    private ArrayList<Card> getCardsByKey(String sqlColumn, String type){
+        ArrayList<Card> cardArrayList = new ArrayList<Card>();
+
+        SQLiteDatabase database = getReadableDatabase();
+
+        String[] cardParams = mCardGenerator.getStringCardParameters();
+
+        Cursor cursor = database.query(TABLE_NAME, cardParams, sqlColumn + " = ?", new String[] { type }, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do{
+                int columns = cursor.getColumnCount();
+                String[] fields = new String[columns];
+                for (int i=0; i < columns; i++) {
+                    fields[i] = cursor.getString(i);
+                }
+                Card card = new Card(mCardGenerator.getCardParameters(), fields);
+                cardArrayList.add(card);
+            }while (cursor.moveToNext());
+        }
+
+        mCards = cardArrayList;
+        return mCards;
+    }
+
+    public ArrayList<Card> getAllyCards(){
+        return getCardsByKey(KEY_TYPE, "Ally");
+    }
+
+    public ArrayList<Card> getQuestCards(){
+        return getCardsByKey(KEY_TYPE, "Quest");
+    }
+
+    public ArrayList<Card> getEquipmentCards(){
+        return getCardsByKey(KEY_TYPE, "Equipment");
+    }
+
+    public ArrayList<Card> getAbilityCards(){
+        return getCardsByKey(KEY_TYPE, "Ability");
     }
 
     private class GenerateDatabaseTask extends AsyncTask<List<Card>,Void,Void> {
