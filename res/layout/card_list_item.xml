@@ -2,25 +2,35 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
+              android:layout_height="fill_parent"
+              android:layout_marginLeft="20dp">
     <TextView android:id="@+id/cardNameLabel"
               android:layout_width="280dp"
               android:layout_height="wrap_content"
-              android:layout_marginLeft="20dp"
               android:singleLine="true"
               android:text="@string/cardNameLabelStubText"
               android:textSize="25dp"/>
-    <TextView android:id="@+id/cardTypeLabel"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginLeft="20dp"
-              android:text="@string/cardTypeLabelStubText"
-              android:layout_below="@id/cardNameLabel"/>
     <TextView android:id="@+id/cardCostLabel"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_marginRight="30dp"
               android:layout_alignParentRight="true"
+              android:layout_centerVertical="true"
               android:text="@string/cardTypeLabelCostStubText"
               android:textSize="25dp"/>
+    <LinearLayout android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_below="@id/cardNameLabel">
+        <TextView android:id="@+id/cardTypeLabel"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:text="@string/cardTypeLabelStubText"
+                  android:textSize="15dp"/>
+        <TextView android:id="@+id/cardNumberLabel"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:paddingLeft="20dp"
+                  android:text="@string/cardNumberLabelStubText"
+                  android:textSize="15dp"/>
+    </LinearLayout>
 </RelativeLayout>

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 
 import java.io.InputStream;
 import java.util.*;
@@ -22,6 +23,7 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "TCGCardsDatabase";
     private static final String TABLE_NAME = "cards";
+    private static final String FTS_TABLE_NAME = "fts_cards";
     private static final String SELECT_ALL_QUERY = "SELECT  * FROM " + TABLE_NAME;
 
     private FillDatabaseTask mAddTask;
@@ -57,13 +59,17 @@ public class CardsDBOperator extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String CREATE_CARDS_TABLE = "CREATE TABLE " + TABLE_NAME + "(" + mCardGenerator.getSqlColumns()+ ")";
+        String CREATE_CARDS_TABLE = "CREATE  TABLE " + TABLE_NAME + "(" + mCardGenerator.getSqlColumns()+ ")";
         sqLiteDatabase.execSQL(CREATE_CARDS_TABLE);
+
+        String CREATE_FTS_CARDS_TABLE = "CREATE VIRTUAL TABLE " + FTS_TABLE_NAME + " USING fts3(" + mCardGenerator.getFTSColumns() + ");";
+        sqLiteDatabase.execSQL(CREATE_FTS_CARDS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS" + TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS" + FTS_TABLE_NAME);
 
         onCreate(sqLiteDatabase);
     }
@@ -87,16 +93,10 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     }
 
     public ArrayList<Card> getCards(){
-        if(!mFilterBuilder.isEmpty()){
-            SQLiteDatabase database = getReadableDatabase();
-
-            Cursor cursor = database.query(TABLE_NAME, mCardGenerator.getStringCardParameters(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray(), null, null, null, null);
-
-            mCards = cardsFromCursor(cursor);
-            return mCards;
-        } else {
-            return getAllCards();
+        if(mCards.isEmpty()){
+            getAllCards();
         }
+        return mCards;
     }
 
     private ArrayList<String> getFilterValuesForType(String type){
@@ -121,12 +121,11 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         return cursor.getCount() > 0;
     }
 
-    private ArrayList<Card> getAllCards(){
+    private void getAllCards(){
         SQLiteDatabase database = getReadableDatabase();
         Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
 
         mCards = cardsFromCursor(cursor);
-        return mCards;
     }
 
     public List<String> getCardTypes(){
@@ -154,16 +153,43 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         return mCardRarity;
     }
 
-    public void addCards(){
-        List<Card> cards = mCardGenerator.generateCards();
-        if (cards != null) {
-            mAddTask.execute(cards, null, null);
+    public void resetCards(){
+        mFilterBuilder.reset();
+        mCards.clear();
+    }
+
+    private String appendWildcard(String query) {
+        if (TextUtils.isEmpty(query)) return query;
+
+        final StringBuilder builder = new StringBuilder();
+        final String[] splits = TextUtils.split(query, " ");
+
+        for (String split : splits)
+            builder.append(split).append("*").append(" ");
+
+        return builder.toString().trim();
+    }
+
+    public void searchCardsForQuery(String query){
+        if (!query.isEmpty()){
+            SQLiteDatabase database = getReadableDatabase();
+
+            Cursor cursor = database.query(FTS_TABLE_NAME, mCardGenerator.getStringCardParameters(), KEY_NAME + " MATCH ?", new String[]{ appendWildcard(query) }, null, null, null);
+
+            mCards = cardsFromCursor(cursor);
         }
     }
 
     public void addFilter(String key, String value){
         mFilterBuilder.addFilters(key, value);
         mFilterBuilder.build();
+        if (!mFilterBuilder.isEmpty()){
+            SQLiteDatabase database = getReadableDatabase();
+
+            Cursor cursor = database.query(TABLE_NAME, mCardGenerator.getStringCardParameters(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray(), null, null, null, null);
+
+            mCards = cardsFromCursor(cursor);
+        }
     }
     public void resetFilters(){
         mFilterBuilder.reset();
@@ -215,6 +241,13 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         }
     }
 
+    public void addCards(){
+        List<Card> cards = mCardGenerator.generateCards();
+        if (cards != null) {
+            mAddTask.execute(cards, null, null);
+        }
+    }
+
     private class FillDatabaseTask extends AsyncTask<List<Card>,Void,Void> {
         private  int mAddedCardsCount;
         @Override
@@ -226,6 +259,7 @@ public class CardsDBOperator extends SQLiteOpenHelper{
             for (Card card : cards) {
                 ContentValues values = card.toContentValues();
                 database.insert(TABLE_NAME, null, values);
+                database.insert(FTS_TABLE_NAME, null, values);
             }
             database.close();
 
@@ -240,7 +274,6 @@ public class CardsDBOperator extends SQLiteOpenHelper{
                 mCallback.databaseGenerationFinished(true, mAddedCardsCount);
             }
             super.onPostExecute(aVoid);
-
         }
     }
     public static interface Callback{

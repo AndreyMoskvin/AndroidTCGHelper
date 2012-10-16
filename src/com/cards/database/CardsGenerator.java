@@ -67,4 +67,14 @@ public class CardsGenerator {
 
         return null;
     }
+
+    public String getFTSColumns(){
+        String separator = ", ";
+        StringBuilder builder = new StringBuilder();
+        for (String parameter : mCardParameters){
+            builder.append(parameter).append(separator);
+        }
+        builder.setLength(builder.length() - separator.length());
+        return builder.toString();
+    }
 }

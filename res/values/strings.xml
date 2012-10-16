@@ -18,4 +18,5 @@
     <string name="cardNameLabelStubText">Name</string>
     <string name="cardTypeLabelStubText">Type</string>
     <string name="cardTypeLabelCostStubText">Cost</string>
+    <string name="cardNumberLabelStubText">Number</string>
 </resources>
