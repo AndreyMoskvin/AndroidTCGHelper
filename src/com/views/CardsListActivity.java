@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
 import com.cards.database.Card;
+import com.cards.database.Refreshable;
 
 import java.util.ArrayList;
 
@@ -24,9 +25,14 @@ import java.util.ArrayList;
  * Time: 9:30 AM
  * To change this template use File | Settings | File Templates.
  */
-public class CardsListActivity extends Activity{
+public class CardsListActivity extends Activity implements Refreshable{
 
     private CardItemAdapter mCardItemAdapter;
+
+    @Override
+    public void refresh() {
+        refreshAdapter();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,10 @@ public class CardsListActivity extends Activity{
         handleIntent(intent);
     }
 
+    private void updateWithQuery(String query){
+        TCGHelperApplication.getInstance().getDatabaseOperator().searchCardsForQuery(query, this);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.list_menu, menu);
@@ -68,8 +78,7 @@ public class CardsListActivity extends Activity{
             @Override
             public boolean onQueryTextChange(String query) {
                 if (!query.isEmpty()) {
-                    TCGHelperApplication.getInstance().getDatabaseOperator().searchCardsForQuery(query);
-                    refreshAdapter();
+                    updateWithQuery(query);
                 } else {
                     TCGHelperApplication.getInstance().getDatabaseOperator().resetCards();
                     refreshAdapter();
@@ -90,8 +99,7 @@ public class CardsListActivity extends Activity{
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
             String query = intent.getStringExtra(SearchManager.QUERY);
-            TCGHelperApplication.getInstance().getDatabaseOperator().searchCardsForQuery(query);
-            refreshAdapter();
+            updateWithQuery(query);
         }
     }
 
