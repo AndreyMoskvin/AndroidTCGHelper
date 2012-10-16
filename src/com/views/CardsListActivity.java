@@ -107,7 +107,6 @@ public class CardsListActivity extends Activity implements Refreshable{
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuFilterOptionsButton:
-                TCGHelperApplication.getInstance().getDatabaseOperator().resetFilters();
                 Intent intent = new Intent(this, FilterActivity.class);
                 startActivity(intent);
                 return true;

@@ -170,14 +170,6 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         return builder.toString().trim();
     }
 
-    public void searchCardsForQuery(String query, Refreshable view){
-        if (!query.isEmpty()){
-            mSearchDatabaseTask.cancel(true);
-            mSearchDatabaseTask = new SearchDatabaseTask(view);
-            mSearchDatabaseTask.execute(query);
-        }
-    }
-
     public void addFilter(String key, String value){
         mFilterBuilder.addFilters(key, value);
         mFilterBuilder.build();
@@ -273,6 +265,14 @@ public class CardsDBOperator extends SQLiteOpenHelper{
                 mCallback.databaseGenerationFinished(true, mAddedCardsCount);
             }
             super.onPostExecute(aVoid);
+        }
+    }
+
+    public void searchCardsForQuery(String query, Refreshable view){
+        if (!query.isEmpty()){
+            mSearchDatabaseTask.cancel(true);
+            mSearchDatabaseTask = new SearchDatabaseTask(view);
+            mSearchDatabaseTask.execute(query);
         }
     }
 
