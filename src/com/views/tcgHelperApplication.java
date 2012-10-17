@@ -1,7 +1,7 @@
 package com.views;
 
 import android.app.Application;
-import com.cards.database.CardsDBOperator;
+import com.cards.database.CardsDatabaseHelper;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -20,13 +20,13 @@ public class TCGHelperApplication extends Application
 {
     private static TCGHelperApplication mInstance;
 
-    public CardsDBOperator mDatabaseOperator;
+    public CardsDatabaseHelper mDatabaseOperator;
 
     public static TCGHelperApplication getInstance(){
         return  mInstance;
     }
 
-    public CardsDBOperator getDatabaseOperator() {
+    public CardsDatabaseHelper getDatabaseOperator() {
         return mDatabaseOperator;
     }
 
@@ -48,7 +48,7 @@ public class TCGHelperApplication extends Application
     public void initializeDatabaseWithCallbackHandler(Object handler){
         try {
             InputStream stream =  getAssets().open("MyDatabase.csv");
-            mDatabaseOperator = new CardsDBOperator(this, (CardsDBOperator.Callback) handler, stream);
+            mDatabaseOperator = new CardsDatabaseHelper(this, (CardsDatabaseHelper.Callback) handler, stream);
         } catch (IOException e) {
             e.printStackTrace();
         }

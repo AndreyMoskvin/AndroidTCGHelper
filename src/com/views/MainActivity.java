@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
-import com.cards.database.CardsDBOperator;
+import com.cards.database.CardsDatabaseHelper;
 
-public class MainActivity extends Activity implements CardsDBOperator.Callback {
+public class MainActivity extends Activity implements CardsDatabaseHelper.Callback {
 
     private TCGHelperApplication mApplication = TCGHelperApplication.getInstance();
 

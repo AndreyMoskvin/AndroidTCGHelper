@@ -18,7 +18,7 @@ import java.util.*;
  * Time: 3:36 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CardsDBOperator extends SQLiteOpenHelper{
+public class CardsDatabaseHelper extends SQLiteOpenHelper{
 
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "TCGCardsDatabase";
@@ -51,9 +51,10 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     private ArrayList<String> mCardSets;
     private ArrayList<String> mCardRarity;
 
-    public CardsDBOperator(Context context, Callback callback, InputStream sourceStream) {
+    public CardsDatabaseHelper(Context context, Callback callback, InputStream sourceStream) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mFillDatabaseTask = new FillDatabaseTask();
+        mFillDatabaseTask.
         mSearchDatabaseTask = new SearchDatabaseTask();
         mDatabaseFetcher = new DatabaseFetcher();
         mCallback = callback;

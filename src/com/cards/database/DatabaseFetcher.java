@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
  * Time: 9:53 AM
  * To change this template use File | Settings | File Templates.
  */
-public class DatabaseFetcher {
+public class DatabaseFetcher{
 
     private ExecutorService mPool;
 
