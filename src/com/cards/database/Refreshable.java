@@ -8,5 +8,6 @@ package com.cards.database;
  * To change this template use File | Settings | File Templates.
  */
 public interface Refreshable {
+    public void beginRefreshing();
     public void refresh();
 }

@@ -28,6 +28,13 @@ public class CardsDBOperator extends SQLiteOpenHelper{
 
     private FillDatabaseTask mFillDatabaseTask;
     private SearchDatabaseTask mSearchDatabaseTask;
+    private Refreshable mRefreshableView;
+    private DatabaseFetcher mDatabaseFetcher;
+
+    public void setRefreshableView(Refreshable mRefreshableView) {
+        this.mRefreshableView = mRefreshableView;
+    }
+
     private Callback mCallback;
     private CardsGenerator mCardGenerator;
     private ArrayList<Card> mCards = new ArrayList<Card>();
@@ -47,7 +54,8 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     public CardsDBOperator(Context context, Callback callback, InputStream sourceStream) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mFillDatabaseTask = new FillDatabaseTask();
-        mSearchDatabaseTask = new SearchDatabaseTask(null);
+        mSearchDatabaseTask = new SearchDatabaseTask();
+        mDatabaseFetcher = new DatabaseFetcher();
         mCallback = callback;
         mCardGenerator = new CardsGenerator(sourceStream);
         mFilterBuilder = new FilterBuilder();
@@ -74,22 +82,28 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         onCreate(sqLiteDatabase);
     }
 
-    private ArrayList<Card>cardsFromCursor(Cursor cursor){
-        ArrayList<Card> cardArrayList = new ArrayList<Card>();
+    private void cardsFromCursor(final Cursor cursor){
+        mRefreshableView.beginRefreshing();
+        mDatabaseFetcher.runFetch(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<Card> cardArrayList = new ArrayList<Card>();
 
-        if (cursor.moveToFirst()) {
-            do{
-                int columns = cursor.getColumnCount();
-                String[] fields = new String[columns];
-                for (int i=0; i < columns; i++) {
-                    fields[i] = cursor.getString(i);
+                if (cursor.moveToFirst()) {
+                    do{
+                        int columns = cursor.getColumnCount();
+                        String[] fields = new String[columns];
+                        for (int i=0; i < columns; i++) {
+                            fields[i] = cursor.getString(i);
+                        }
+                        Card card = new Card(mCardGenerator.getCardParameters(), fields);
+                        cardArrayList.add(card);
+                    }while (cursor.moveToNext());
                 }
-                Card card = new Card(mCardGenerator.getCardParameters(), fields);
-                cardArrayList.add(card);
-            }while (cursor.moveToNext());
-        }
-
-        return cardArrayList;
+                mCards = cardArrayList;
+                mRefreshableView.refresh();
+            }
+        });
     }
 
     public ArrayList<Card> getCards(){
@@ -124,8 +138,7 @@ public class CardsDBOperator extends SQLiteOpenHelper{
     private void getAllCards(){
         SQLiteDatabase database = getReadableDatabase();
         Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
-
-        mCards = cardsFromCursor(cursor);
+        cardsFromCursor(cursor);
     }
 
     public List<String> getCardTypes(){
@@ -178,7 +191,7 @@ public class CardsDBOperator extends SQLiteOpenHelper{
 
             Cursor cursor = database.query(TABLE_NAME, mCardGenerator.getStringCardParameters(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray(), null, null, null, null);
 
-            mCards = cardsFromCursor(cursor);
+            cardsFromCursor(cursor);
         }
     }
     public void resetFilters(){
@@ -268,21 +281,15 @@ public class CardsDBOperator extends SQLiteOpenHelper{
         }
     }
 
-    public void searchCardsForQuery(String query, Refreshable view){
+    public void searchCardsForQuery(String query){
         if (!query.isEmpty()){
             mSearchDatabaseTask.cancel(true);
-            mSearchDatabaseTask = new SearchDatabaseTask(view);
+            mSearchDatabaseTask = new SearchDatabaseTask();
             mSearchDatabaseTask.execute(query);
         }
     }
 
     private class SearchDatabaseTask extends AsyncTask<String,Void,Void> {
-
-        private Refreshable viewToRefresh;
-
-        private SearchDatabaseTask(Refreshable viewToRefresh) {
-            this.viewToRefresh = viewToRefresh;
-        }
 
         @Override
         protected Void doInBackground(String... strings) {
@@ -292,14 +299,14 @@ public class CardsDBOperator extends SQLiteOpenHelper{
 
                 Cursor cursor = database.query(FTS_TABLE_NAME, mCardGenerator.getStringCardParameters(), FTS_TABLE_NAME + " MATCH ?", new String[]{ appendWildcard(query) }, null, null, null);
 
-                mCards = cardsFromCursor(cursor);
+                cardsFromCursor(cursor);
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            viewToRefresh.refresh();
+            mRefreshableView.refresh();
             super.onPostExecute(aVoid);
         }
     }

@@ -9,10 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.TextView;
+import android.widget.*;
 import com.cards.database.Card;
 import com.cards.database.Refreshable;
 
@@ -28,16 +25,37 @@ import java.util.ArrayList;
 public class CardsListActivity extends Activity implements Refreshable{
 
     private CardItemAdapter mCardItemAdapter;
+    private ProgressBar mProgress;
 
     @Override
     public void refresh() {
-        refreshAdapter();
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                refreshAdapter();
+                mProgress.setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+
+    @Override
+    public void beginRefreshing() {
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mProgress.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.card_list);
+
+        mProgress = (ProgressBar)findViewById(R.id.listProgressBar);
+
+        TCGHelperApplication.getInstance().getDatabaseOperator().setRefreshableView(this);
 
         ListView listView = (ListView)findViewById(R.id.cardListView);
         mCardItemAdapter = new CardItemAdapter(TCGHelperApplication.getInstance().getDatabaseOperator().getCards());
@@ -60,7 +78,7 @@ public class CardsListActivity extends Activity implements Refreshable{
     }
 
     private void updateWithQuery(String query){
-        TCGHelperApplication.getInstance().getDatabaseOperator().searchCardsForQuery(query, this);
+        TCGHelperApplication.getInstance().getDatabaseOperator().searchCardsForQuery(query);
     }
 
     @Override
