@@ -7,7 +7,10 @@ import android.view.View;
 import android.widget.Toast;
 import com.cards.database.CardsDatabaseHelper;
 
-public class MainActivity extends Activity implements CardsDatabaseHelper.Callback {
+import java.io.IOException;
+import java.io.InputStream;
+
+public class MainActivity extends Activity implements CardsDatabaseHelper.OnDatabaseGenerationFinished {
 
     private TCGHelperApplication mApplication = TCGHelperApplication.getInstance();
 
@@ -17,7 +20,20 @@ public class MainActivity extends Activity implements CardsDatabaseHelper.Callba
         setContentView(R.layout.main);
         getActionBar().hide();
 
-        mApplication.initializeDatabaseWithCallbackHandler(this);
+        InputStream stream;
+        try {
+            stream = getAssets().open("MyDatabase.csv");
+            mApplication.setCardsDatabaseHelper(new CardsDatabaseHelper(this, stream));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        mApplication.getDatabaseOperator().setOnDatabaseGenerationFinished(new CardsDatabaseHelper.OnDatabaseGenerationFinished() {
+            @Override
+            public void databaseGenerationFinished(Boolean success, int itemsAdded) {
+                Toast.makeText(mApplication, "Added " + itemsAdded + " cards!", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         if (!mApplication.getDatabaseOperator().hasData()) {
             generateDatabase();
@@ -35,11 +51,10 @@ public class MainActivity extends Activity implements CardsDatabaseHelper.Callba
     }
 
     private void generateDatabase(){
-        Toast.makeText(this, "Adding cards to database...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mApplication, "Adding cards to database...", Toast.LENGTH_SHORT).show();
         mApplication.getDatabaseOperator().addCards();
     }
 
     public void databaseGenerationFinished(Boolean success, int itemsAdded) {
-        Toast.makeText(this, "Added " + itemsAdded + " cards!", Toast.LENGTH_SHORT).show();
     }
 }

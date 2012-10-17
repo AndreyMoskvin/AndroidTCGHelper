@@ -27,7 +27,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     private static final String SELECT_ALL_QUERY = "SELECT  * FROM " + TABLE_NAME;
 
     private FillDatabaseTask mFillDatabaseTask;
-    private SearchDatabaseTask mSearchDatabaseTask;
     private Refreshable mRefreshableView;
     private DatabaseFetcher mDatabaseFetcher;
 
@@ -35,7 +34,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         this.mRefreshableView = mRefreshableView;
     }
 
-    private Callback mCallback;
     private CardsGenerator mCardGenerator;
     private ArrayList<Card> mCards = new ArrayList<Card>();
     private FilterBuilder mFilterBuilder;
@@ -45,19 +43,22 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     public static final String KEY_SET = "from_set";
     public static final String KEY_RARITY = "rarity";
 
+    private OnDatabaseGenerationFinished mDBGenerationFinishedListener;
+
     private static final String FILTER_ALL= "All";
     private ArrayList<String> mCardTypes;
     private ArrayList<String> mCardCosts;
     private ArrayList<String> mCardSets;
     private ArrayList<String> mCardRarity;
 
-    public CardsDatabaseHelper(Context context, Callback callback, InputStream sourceStream) {
+    public void setOnDatabaseGenerationFinished(OnDatabaseGenerationFinished onDatabaseGenerationFinished){
+        mDBGenerationFinishedListener = onDatabaseGenerationFinished;
+    }
+
+    public CardsDatabaseHelper(Context context,  InputStream sourceStream) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mFillDatabaseTask = new FillDatabaseTask();
-        mFillDatabaseTask.
-        mSearchDatabaseTask = new SearchDatabaseTask();
         mDatabaseFetcher = new DatabaseFetcher();
-        mCallback = callback;
         mCardGenerator = new CardsGenerator(sourceStream);
         mFilterBuilder = new FilterBuilder();
         mCardTypes = new ArrayList<String>();
@@ -83,7 +84,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         onCreate(sqLiteDatabase);
     }
 
-    private void cardsFromCursor(final Cursor cursor){
+    private void performFetchForCursor(final Cursor cursor){
         mRefreshableView.beginRefreshing();
         mDatabaseFetcher.runFetch(new Runnable() {
             @Override
@@ -139,7 +140,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     private void getAllCards(){
         SQLiteDatabase database = getReadableDatabase();
         Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
-        cardsFromCursor(cursor);
+        performFetchForCursor(cursor);
     }
 
     public List<String> getCardTypes(){
@@ -192,7 +193,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
 
             Cursor cursor = database.query(TABLE_NAME, mCardGenerator.getStringCardParameters(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray(), null, null, null, null);
 
-            cardsFromCursor(cursor);
+            performFetchForCursor(cursor);
         }
     }
     public void resetFilters(){
@@ -275,8 +276,8 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            if(mCallback != null) {
-                mCallback.databaseGenerationFinished(true, mAddedCardsCount);
+            if(mDBGenerationFinishedListener != null) {
+                mDBGenerationFinishedListener.databaseGenerationFinished(true, mAddedCardsCount);
             }
             super.onPostExecute(aVoid);
         }
@@ -284,35 +285,15 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
 
     public void searchCardsForQuery(String query){
         if (!query.isEmpty()){
-            mSearchDatabaseTask.cancel(true);
-            mSearchDatabaseTask = new SearchDatabaseTask();
-            mSearchDatabaseTask.execute(query);
+            SQLiteDatabase database = getReadableDatabase();
+
+            Cursor cursor = database.query(FTS_TABLE_NAME, mCardGenerator.getStringCardParameters(), FTS_TABLE_NAME + " MATCH ?", new String[]{ appendWildcard(query) }, null, null, null);
+
+            performFetchForCursor(cursor);
         }
     }
 
-    private class SearchDatabaseTask extends AsyncTask<String,Void,Void> {
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            String query = strings[0];
-            if (!query.isEmpty()){
-                SQLiteDatabase database = getReadableDatabase();
-
-                Cursor cursor = database.query(FTS_TABLE_NAME, mCardGenerator.getStringCardParameters(), FTS_TABLE_NAME + " MATCH ?", new String[]{ appendWildcard(query) }, null, null, null);
-
-                cardsFromCursor(cursor);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            mRefreshableView.refresh();
-            super.onPostExecute(aVoid);
-        }
-    }
-
-    public static interface Callback{
+    public static interface OnDatabaseGenerationFinished {
         void databaseGenerationFinished(Boolean success, int itemsAdded);
     }
 }
