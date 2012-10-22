@@ -31,7 +31,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     private FillDatabaseTask mFillDatabaseTask;
     private DatabaseFetcher mDatabaseFetcher;
     private Cursor mCurrentCursor;
-    private SqlColumnBuilder mColumnBuilder;
 
     public Cursor getCurrentCursor(){
         return mCurrentCursor;
