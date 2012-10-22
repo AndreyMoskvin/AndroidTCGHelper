@@ -4,16 +4,14 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import com.cards.database.Card;
 import com.cards.database.Refreshable;
-
-import java.util.ArrayList;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,18 +26,18 @@ public class CardsListActivity extends Activity implements Refreshable{
     private ProgressBar mProgress;
 
     @Override
-    public void refresh() {
+    public void refreshAdapterWithCursor(final Cursor cursor) {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                refreshAdapter();
+                mCardItemAdapter.setCursor(cursor);
                 mProgress.setVisibility(View.INVISIBLE);
             }
         });
     }
 
     @Override
-    public void beginRefreshing() {
+    public void beginRefreshingActivity() {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -58,17 +56,10 @@ public class CardsListActivity extends Activity implements Refreshable{
         TCGHelperApplication.getInstance().getDatabaseOperator().setRefreshableView(this);
 
         ListView listView = (ListView)findViewById(R.id.cardListView);
-        mCardItemAdapter = new CardItemAdapter(TCGHelperApplication.getInstance().getDatabaseOperator().getCards());
+        mCardItemAdapter = new CardItemAdapter(TCGHelperApplication.getInstance().getDatabaseOperator().getCurrentCursor());
         listView.setAdapter(mCardItemAdapter);
 
         handleIntent(getIntent());
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        refreshAdapter();
     }
 
     @Override
@@ -99,19 +90,21 @@ public class CardsListActivity extends Activity implements Refreshable{
                     updateWithQuery(query);
                 } else {
                     TCGHelperApplication.getInstance().getDatabaseOperator().resetCards();
-                    refreshAdapter();
                 }
-
                 return true;
             }
         });
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+               if (!hasFocus){
+                    TCGHelperApplication.getInstance().getDatabaseOperator().resetCards();
+                }
+            }
+        });
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    private void refreshAdapter() {
-        mCardItemAdapter.setCardArrayList(TCGHelperApplication.getInstance().getDatabaseOperator().getCards());
     }
 
     private void handleIntent(Intent intent) {
@@ -129,8 +122,7 @@ public class CardsListActivity extends Activity implements Refreshable{
                 startActivity(intent);
                 return true;
             case R.id.menuSearchButton:
-                TCGHelperApplication.getInstance().getDatabaseOperator().resetCards();
-                refreshAdapter();
+//                refreshAdapter();
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -138,15 +130,15 @@ public class CardsListActivity extends Activity implements Refreshable{
 
     private class CardItemAdapter extends BaseAdapter {
 
-        private ArrayList<Card> mCardArrayList;
+        private Cursor mCursor;
 
-        public void setCardArrayList(ArrayList<Card> mCardArrayList) {
-            this.mCardArrayList = mCardArrayList;
+        public void setCursor(Cursor cursor) {
+            this.mCursor = cursor;
             this.notifyDataSetChanged();
         }
 
-        private CardItemAdapter(ArrayList<Card> mCardArrayList) {
-            this.mCardArrayList = mCardArrayList;
+        private CardItemAdapter(Cursor cursor) {
+            this.mCursor = cursor;
         }
 
         private class ViewHolder {
@@ -158,12 +150,13 @@ public class CardsListActivity extends Activity implements Refreshable{
 
         @Override
         public int getCount() {
-            return mCardArrayList.size();
+            return mCursor.getCount();
         }
 
         @Override
         public Object getItem(int i) {
-            return mCardArrayList.get(i);
+            mCursor.moveToPosition(i);
+            return mCursor.getInt(0);
         }
 
         @Override
@@ -188,11 +181,13 @@ public class CardsListActivity extends Activity implements Refreshable{
                 holder = (ViewHolder)convertView.getTag();
             }
 
+            mCursor.moveToPosition(i);
+
             //TODO:Remove hard-coded values
-            holder.name.setText(mCardArrayList.get(i).getValueFromAttributeType("name"));
-            holder.cost.setText(mCardArrayList.get(i).getValueFromAttributeType("cost"));
-            holder.type.setText(mCardArrayList.get(i).getValueFromAttributeType("type"));
-            holder.number.setText(mCardArrayList.get(i).getValueFromAttributeType("number"));
+            holder.name.setText(mCursor.getString(1));//"name"
+            holder.cost.setText(mCursor.getString(8));//"cost"
+            holder.type.setText(mCursor.getString(7));//"type"
+            holder.number.setText(mCursor.getString(6));//"number"
 
             return convertView;
         }

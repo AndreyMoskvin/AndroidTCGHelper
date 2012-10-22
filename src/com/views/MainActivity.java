@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 import com.cards.database.CardsDatabaseHelper;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MainActivity extends Activity implements CardsDatabaseHelper.OnDatabaseGenerationFinished {
+public class MainActivity extends Activity{
 
     private TCGHelperApplication mApplication = TCGHelperApplication.getInstance();
 
@@ -19,6 +20,8 @@ public class MainActivity extends Activity implements CardsDatabaseHelper.OnData
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         getActionBar().hide();
+
+        final Button showCardsList = (Button)findViewById(R.id.showCards);
 
         InputStream stream;
         try {
@@ -31,6 +34,7 @@ public class MainActivity extends Activity implements CardsDatabaseHelper.OnData
         mApplication.getDatabaseOperator().setOnDatabaseGenerationFinished(new CardsDatabaseHelper.OnDatabaseGenerationFinished() {
             @Override
             public void databaseGenerationFinished(Boolean success, int itemsAdded) {
+                showCardsList.setVisibility(View.VISIBLE);
                 Toast.makeText(mApplication, "Added " + itemsAdded + " cards!", Toast.LENGTH_SHORT).show();
             }
         });
@@ -38,6 +42,11 @@ public class MainActivity extends Activity implements CardsDatabaseHelper.OnData
         if (!mApplication.getDatabaseOperator().hasData()) {
             generateDatabase();
         }
+        else {
+            showCardsList.setVisibility(View.VISIBLE);
+        }
+
+        TCGHelperApplication.getInstance().getDatabaseOperator().getAllCards();
     }
 
     public void openActivity(View view){
@@ -46,6 +55,7 @@ public class MainActivity extends Activity implements CardsDatabaseHelper.OnData
     }
 
     public void openListActivity(View view){
+
         Intent intent = new Intent(this, CardsListActivity.class);
         startActivity(intent);
     }
@@ -53,8 +63,5 @@ public class MainActivity extends Activity implements CardsDatabaseHelper.OnData
     private void generateDatabase(){
         Toast.makeText(mApplication, "Adding cards to database...", Toast.LENGTH_SHORT).show();
         mApplication.getDatabaseOperator().addCards();
-    }
-
-    public void databaseGenerationFinished(Boolean success, int itemsAdded) {
     }
 }

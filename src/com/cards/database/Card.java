@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * Time: 4:04 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Card {
+public class Card{
 
     private ArrayList<Attribute> mAttributes;
 
@@ -22,6 +22,7 @@ public class Card {
             addAttribute(types.get(i) , attributes[i]);
         }
     }
+
     private void addAttribute(String type, String value){
         Attribute attribute = new Attribute(type,value);
         if (!mAttributes.contains(attribute)) {

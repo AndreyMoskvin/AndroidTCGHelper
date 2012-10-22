@@ -71,7 +71,8 @@
                     android:text="@string/show_cards_list"
                     android:layout_centerHorizontal="true"
                     android:layout_above="@id/showGalleryButton"
-                    android:onClick="openListActivity"/>
+                    android:onClick="openListActivity"
+                    android:visibility="invisible"/>
     </RelativeLayout>
 </LinearLayout>
 

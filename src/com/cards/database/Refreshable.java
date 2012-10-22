@@ -1,5 +1,7 @@
 package com.cards.database;
 
+import android.database.Cursor;
+
 /**
  * Created with IntelliJ IDEA.
  * User: andrey.moskvin
@@ -8,6 +10,6 @@ package com.cards.database;
  * To change this template use File | Settings | File Templates.
  */
 public interface Refreshable {
-    public void beginRefreshing();
-    public void refresh();
+    public void beginRefreshingActivity();
+    public void refreshAdapterWithCursor(Cursor cursor);
 }

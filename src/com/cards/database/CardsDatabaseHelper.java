@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.InputStream;
 import java.util.*;
@@ -29,6 +30,11 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     private FillDatabaseTask mFillDatabaseTask;
     private Refreshable mRefreshableView;
     private DatabaseFetcher mDatabaseFetcher;
+    private Cursor mCurrentCursor;
+
+    public Cursor getCurrentCursor(){
+        return mCurrentCursor;
+    }
 
     public void setRefreshableView(Refreshable mRefreshableView) {
         this.mRefreshableView = mRefreshableView;
@@ -46,10 +52,10 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     private OnDatabaseGenerationFinished mDBGenerationFinishedListener;
 
     private static final String FILTER_ALL= "All";
-    private ArrayList<String> mCardTypes;
-    private ArrayList<String> mCardCosts;
-    private ArrayList<String> mCardSets;
-    private ArrayList<String> mCardRarity;
+    private Cursor mTypesCursor;
+    private Cursor mCostsCursor;
+    private Cursor mSetsCursor;
+    private Cursor mRarityCursor;
 
     public void setOnDatabaseGenerationFinished(OnDatabaseGenerationFinished onDatabaseGenerationFinished){
         mDBGenerationFinishedListener = onDatabaseGenerationFinished;
@@ -61,10 +67,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         mDatabaseFetcher = new DatabaseFetcher();
         mCardGenerator = new CardsGenerator(sourceStream);
         mFilterBuilder = new FilterBuilder();
-        mCardTypes = new ArrayList<String>();
-        mCardCosts = new ArrayList<String>();
-        mCardSets = new ArrayList<String>();
-        mCardRarity = new ArrayList<String>();
     }
 
     @Override
@@ -84,49 +86,34 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         onCreate(sqLiteDatabase);
     }
 
-    private void performFetchForCursor(final Cursor cursor){
-        mRefreshableView.beginRefreshing();
+    private void performRawFetchWithQuery(final String query){
+        if (mRefreshableView != null) mRefreshableView.beginRefreshingActivity();
         mDatabaseFetcher.runFetch(new Runnable() {
             @Override
             public void run() {
-                ArrayList<Card> cardArrayList = new ArrayList<Card>();
-
-                if (cursor.moveToFirst()) {
-                    do{
-                        int columns = cursor.getColumnCount();
-                        String[] fields = new String[columns];
-                        for (int i=0; i < columns; i++) {
-                            fields[i] = cursor.getString(i);
-                        }
-                        Card card = new Card(mCardGenerator.getCardParameters(), fields);
-                        cardArrayList.add(card);
-                    }while (cursor.moveToNext());
-                }
-                mCards = cardArrayList;
-                mRefreshableView.refresh();
+                SQLiteDatabase database = getReadableDatabase();
+                Cursor cursor = database.rawQuery(query, null, null);
+                mCurrentCursor = cursor;
+                if (mRefreshableView != null) mRefreshableView.refreshAdapterWithCursor(cursor);
             }
         });
     }
 
-    public ArrayList<Card> getCards(){
-        if(mCards.isEmpty()){
-            getAllCards();
-        }
-        return mCards;
+    private void performFetchWithQueryParameters(final String tableName, final String[] fetchColumns, final String query, final String[] fetchValues){
+        if (mRefreshableView != null) mRefreshableView.beginRefreshingActivity();
+        mDatabaseFetcher.runFetch(new Runnable() {
+            @Override
+            public void run() {
+                SQLiteDatabase database = getReadableDatabase();
+                Cursor cursor = database.query(tableName, fetchColumns, query, fetchValues, null ,null, null, null);
+                mCurrentCursor = cursor;
+                if (mRefreshableView != null) mRefreshableView.refreshAdapterWithCursor(cursor);
+            }
+        });
     }
 
-    private ArrayList<String> getFilterValuesForType(String type){
-        Set<String> uniqueTypesSet = new HashSet<String>();
-        for (Card card : mCards){
-            String value = card.getValueFromAttributeType(type);
-            uniqueTypesSet.add(value);
-        }
-
-        ArrayList<String> result = new ArrayList<String>();
-        result.addAll(uniqueTypesSet);
-        result.add(0, FILTER_ALL);
-
-        return result;
+    private Cursor extractFilterValuesForColumn(SQLiteDatabase database, final String column){
+        return database.rawQuery("SELECT DISTINCT " + column + " FROM " + TABLE_NAME, null, null);
     }
 
     public boolean hasData(){
@@ -137,40 +124,37 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         return cursor.getCount() > 0;
     }
 
-    private void getAllCards(){
-        SQLiteDatabase database = getReadableDatabase();
-        Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
-        performFetchForCursor(cursor);
+    public void getAllCards(){
+        performRawFetchWithQuery(SELECT_ALL_QUERY);
+        mDatabaseFetcher.runFetch(new Runnable() {
+            @Override
+            public void run() {
+                SQLiteDatabase database = getReadableDatabase();
+                mTypesCursor = extractFilterValuesForColumn(database, "type");
+                mCostsCursor = extractFilterValuesForColumn(database, "cost");
+                mSetsCursor = extractFilterValuesForColumn(database, "from_set");
+                mRarityCursor = extractFilterValuesForColumn(database, "rarity");
+            }
+        });
+
     }
 
-    public List<String> getCardTypes(){
-        if (mCardTypes.isEmpty()){
-            mCardTypes = getFilterValuesForType(KEY_TYPE);
-        }
-        return mCardTypes;
+    public Cursor getCardTypes(){
+        return mTypesCursor;
     }
-    public List<String> getCardCosts(){
-        if (mCardCosts.isEmpty()){
-            mCardCosts = getFilterValuesForType(KEY_COST);
-        }
-        return mCardCosts;
+    public Cursor getCardCosts(){
+        return mCostsCursor;
     }
-    public List<String> getCardSets(){
-        if (mCardSets.isEmpty()){
-            mCardSets = getFilterValuesForType(KEY_SET);
-        }
-        return mCardSets;
+    public Cursor getCardSets(){
+        return mSetsCursor;
     }
-    public List<String> getCardRarity(){
-        if (mCardRarity.isEmpty()){
-            mCardRarity = getFilterValuesForType(KEY_RARITY);
-        }
-        return mCardRarity;
+    public Cursor getCardRarity(){
+        return mRarityCursor;
     }
 
     public void resetCards(){
         mFilterBuilder.reset();
-        mCards.clear();
+        performRawFetchWithQuery(SELECT_ALL_QUERY);
     }
 
     private String appendWildcard(String query) {
@@ -189,11 +173,8 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         mFilterBuilder.addFilters(key, value);
         mFilterBuilder.build();
         if (!mFilterBuilder.isEmpty()){
-            SQLiteDatabase database = getReadableDatabase();
-
-            Cursor cursor = database.query(TABLE_NAME, mCardGenerator.getStringCardParameters(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray(), null, null, null, null);
-
-            performFetchForCursor(cursor);
+            mCards.clear();
+            performFetchWithQueryParameters(TABLE_NAME, mCardGenerator.getStringCardParameters(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray());
         }
     }
     public void resetFilters(){
@@ -266,6 +247,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
                 ContentValues values = card.toContentValues();
                 database.insert(TABLE_NAME, null, values);
                 database.insert(FTS_TABLE_NAME, null, values);
+                Log.d("DATABASE", "Inserted card " + values.get("name"));
             }
             database.close();
 
@@ -284,13 +266,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     }
 
     public void searchCardsForQuery(String query){
-        if (!query.isEmpty()){
-            SQLiteDatabase database = getReadableDatabase();
-
-            Cursor cursor = database.query(FTS_TABLE_NAME, mCardGenerator.getStringCardParameters(), FTS_TABLE_NAME + " MATCH ?", new String[]{ appendWildcard(query) }, null, null, null);
-
-            performFetchForCursor(cursor);
-        }
+            performFetchWithQueryParameters(FTS_TABLE_NAME, mCardGenerator.getStringCardParameters(), FTS_TABLE_NAME + " MATCH ? ", new String[]{appendWildcard(query)});
     }
 
     public static interface OnDatabaseGenerationFinished {

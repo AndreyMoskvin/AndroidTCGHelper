@@ -40,7 +40,7 @@
              android:layout_below="@id/filterTypeSpinner"
              android:layout_toRightOf="@id/filterTypeLabel"
              android:layout_marginLeft="20dp"
-             android:layout_marginTop="10dp" />
+             android:layout_marginTop="5dp" />
     <TextView android:id="@+id/filterSetLabel"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
              android:layout_below="@id/filterCostSpinner"
              android:layout_toRightOf="@id/filterTypeLabel"
              android:layout_marginLeft="20dp"
-             android:layout_marginTop="10dp" />
+             android:layout_marginTop="5dp" />
     <TextView android:id="@+id/filterRarityLabel"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
              android:layout_below="@id/filterSetSpinner"
              android:layout_toRightOf="@id/filterTypeLabel"
              android:layout_marginLeft="20dp"
-             android:layout_marginTop="10dp" />
+             android:layout_marginTop="5dp" />
     <Button android:id="@+id/filterSaveSettings"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
