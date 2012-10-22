@@ -9,9 +9,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.*;
-import com.cards.database.Refreshable;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.SearchView;
+import com.adapters.CardItemAdapter;
 
 /**
  * Created with IntelliJ IDEA.
@@ -56,7 +57,7 @@ public class CardsListActivity extends Activity implements Refreshable{
         TCGHelperApplication.getInstance().getDatabaseOperator().setRefreshableView(this);
 
         ListView listView = (ListView)findViewById(R.id.cardListView);
-        mCardItemAdapter = new CardItemAdapter(TCGHelperApplication.getInstance().getDatabaseOperator().getCurrentCursor());
+        mCardItemAdapter = new CardItemAdapter(getLayoutInflater());
         listView.setAdapter(mCardItemAdapter);
 
         handleIntent(getIntent());
@@ -125,71 +126,6 @@ public class CardsListActivity extends Activity implements Refreshable{
 //                refreshAdapter();
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private class CardItemAdapter extends BaseAdapter {
-
-        private Cursor mCursor;
-
-        public void setCursor(Cursor cursor) {
-            this.mCursor = cursor;
-            this.notifyDataSetChanged();
-        }
-
-        private CardItemAdapter(Cursor cursor) {
-            this.mCursor = cursor;
-        }
-
-        private class ViewHolder {
-            public TextView name;
-            public TextView cost;
-            public TextView type;
-            public TextView number;
-        }
-
-        @Override
-        public int getCount() {
-            return mCursor.getCount();
-        }
-
-        @Override
-        public Object getItem(int i) {
-            mCursor.moveToPosition(i);
-            return mCursor.getInt(0);
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View view, ViewGroup viewGroup) {
-            View convertView = view;
-            final  ViewHolder holder;
-            if (view == null) {
-                convertView = getLayoutInflater().inflate(R.layout.card_list_item, null);
-                holder = new ViewHolder();
-                holder.name = (TextView) convertView.findViewById(R.id.cardNameLabel);
-                holder.cost = (TextView) convertView.findViewById(R.id.cardCostLabel);
-                holder.type = (TextView) convertView.findViewById(R.id.cardTypeLabel);
-                holder.number = (TextView) convertView.findViewById(R.id.cardNumberLabel);
-                convertView.setTag(holder);
-            }
-            else {
-                holder = (ViewHolder)convertView.getTag();
-            }
-
-            mCursor.moveToPosition(i);
-
-            //TODO:Remove hard-coded values
-            holder.name.setText(mCursor.getString(1));//"name"
-            holder.cost.setText(mCursor.getString(8));//"cost"
-            holder.type.setText(mCursor.getString(7));//"type"
-            holder.number.setText(mCursor.getString(6));//"number"
-
-            return convertView;
         }
     }
 }

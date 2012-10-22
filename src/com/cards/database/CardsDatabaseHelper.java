@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
+import com.views.Refreshable;
 
 import java.io.InputStream;
 import java.util.*;
@@ -28,13 +29,15 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     private static final String SELECT_ALL_QUERY = "SELECT  * FROM " + TABLE_NAME;
 
     private FillDatabaseTask mFillDatabaseTask;
-    private Refreshable mRefreshableView;
     private DatabaseFetcher mDatabaseFetcher;
     private Cursor mCurrentCursor;
+    private SqlColumnBuilder mColumnBuilder;
 
     public Cursor getCurrentCursor(){
         return mCurrentCursor;
     }
+
+    private Refreshable mRefreshableView;
 
     public void setRefreshableView(Refreshable mRefreshableView) {
         this.mRefreshableView = mRefreshableView;
@@ -130,10 +133,10 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
             @Override
             public void run() {
                 SQLiteDatabase database = getReadableDatabase();
-                mTypesCursor = extractFilterValuesForColumn(database, "type");
-                mCostsCursor = extractFilterValuesForColumn(database, "cost");
-                mSetsCursor = extractFilterValuesForColumn(database, "from_set");
-                mRarityCursor = extractFilterValuesForColumn(database, "rarity");
+                mTypesCursor = extractFilterValuesForColumn(database, KEY_TYPE);
+                mCostsCursor = extractFilterValuesForColumn(database, KEY_COST);
+                mSetsCursor = extractFilterValuesForColumn(database, KEY_SET);
+                mRarityCursor = extractFilterValuesForColumn(database, KEY_RARITY);
             }
         });
 
@@ -155,18 +158,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     public void resetCards(){
         mFilterBuilder.reset();
         performRawFetchWithQuery(SELECT_ALL_QUERY);
-    }
-
-    private String appendWildcard(String query) {
-        if (TextUtils.isEmpty(query)) return query;
-
-        final StringBuilder builder = new StringBuilder();
-        final String[] splits = TextUtils.split(query, " ");
-
-        for (String split : splits)
-            builder.append(split).append("*").append(" ");
-
-        return builder.toString().trim();
     }
 
     public void addFilter(String key, String value){
@@ -263,6 +254,18 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
             }
             super.onPostExecute(aVoid);
         }
+    }
+
+    private String appendWildcard(String query) {
+        if (TextUtils.isEmpty(query)) return query;
+
+        final StringBuilder builder = new StringBuilder();
+        final String[] splits = TextUtils.split(query, " ");
+
+        for (String split : splits)
+            builder.append(split).append("*").append(" ");
+
+        return builder.toString().trim();
     }
 
     public void searchCardsForQuery(String query){

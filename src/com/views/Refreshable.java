@@ -1,4 +1,4 @@
-package com.cards.database;
+package com.views;
 
 import android.database.Cursor;
 
