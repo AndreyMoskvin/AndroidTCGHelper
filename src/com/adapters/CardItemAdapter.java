@@ -75,9 +75,9 @@ public class CardItemAdapter extends BaseAdapter {
 
         //TODO:Remove hard-coded values
         holder.name.setText(mCursor.getString(1));//"name"
-        holder.cost.setText(mCursor.getString(8));//"cost"
-        holder.type.setText(mCursor.getString(7));//"type"
-        holder.number.setText(mCursor.getString(6));//"number"
+//        holder.cost.setText(mCursor.getString(8));//"cost"
+//        holder.type.setText(mCursor.getString(7));//"type"
+//        holder.number.setText(mCursor.getString(6));//"number"
 
         return convertView;
     }

@@ -22,6 +22,11 @@ import java.util.*;
  */
 public class CardsDatabaseHelper extends SQLiteOpenHelper{
 
+    public static final String KEY_COST = "cost";
+    public static final String KEY_TYPE = "type";
+    public static final String KEY_SET = "from_set";
+    public static final String KEY_RARITY = "rarity";
+
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "TCGCardsDatabase";
     private static final String TABLE_NAME = "cards";
@@ -30,14 +35,15 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
 
     private FillDatabaseTask mFillDatabaseTask;
     private DatabaseFetcher mDatabaseFetcher;
-    private Cursor mCurrentCursor;
+    private SqlColumnsGenerator mSqlColumnsGenerator;
+    private InputStream mCsvFileStream;
 
+    private Cursor mCurrentCursor;
     public Cursor getCurrentCursor(){
         return mCurrentCursor;
     }
 
     private Refreshable mRefreshableView;
-
     public void setRefreshableView(Refreshable mRefreshableView) {
         this.mRefreshableView = mRefreshableView;
     }
@@ -46,37 +52,64 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     private ArrayList<Card> mCards = new ArrayList<Card>();
     private FilterBuilder mFilterBuilder;
 
-    public static final String KEY_COST = "cost";
-    public static final String KEY_TYPE = "type";
-    public static final String KEY_SET = "from_set";
-    public static final String KEY_RARITY = "rarity";
-
     private OnDatabaseGenerationFinished mDBGenerationFinishedListener;
 
     private static final String FILTER_ALL= "All";
+
     private Cursor mTypesCursor;
+    public Cursor getCardTypes(){
+        return mTypesCursor;
+    }
+
     private Cursor mCostsCursor;
+    public Cursor getCardCosts(){
+        return mCostsCursor;
+    }
+
     private Cursor mSetsCursor;
+    public Cursor getCardSets(){
+        return mSetsCursor;
+    }
+
     private Cursor mRarityCursor;
+    public Cursor getCardRarity(){
+        return mRarityCursor;
+    }
 
     public void setOnDatabaseGenerationFinished(OnDatabaseGenerationFinished onDatabaseGenerationFinished){
         mDBGenerationFinishedListener = onDatabaseGenerationFinished;
     }
 
+    private void initSqlColumnsGenerator(){
+        SQLiteDatabase database = getReadableDatabase();
+        Cursor cursor = database.rawQuery(SELECT_ALL_QUERY, null);
+        ArrayList<String> columns = new ArrayList<String>();
+        if (cursor != null && cursor.getColumnCount() > 0) {
+            Collections.addAll(columns, cursor.getColumnNames());
+        }
+
+        if (!columns.isEmpty()) mSqlColumnsGenerator = new SqlColumnsGenerator(columns);
+    }
+
     public CardsDatabaseHelper(Context context,  InputStream sourceStream) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        mCsvFileStream = sourceStream;
         mFillDatabaseTask = new FillDatabaseTask();
         mDatabaseFetcher = new DatabaseFetcher();
-        mCardGenerator = new CardsGenerator(sourceStream);
         mFilterBuilder = new FilterBuilder();
+        initSqlColumnsGenerator();
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String CREATE_CARDS_TABLE = "CREATE  TABLE " + TABLE_NAME + "(" + mCardGenerator.getSqlColumns()+ ")";
+        mCardGenerator = new CardsGenerator(mCsvFileStream);
+        mSqlColumnsGenerator =  new SqlColumnsGenerator(mCardGenerator.getParser().readParameters());
+        mCardGenerator.setCardParameters(mSqlColumnsGenerator.getListOfSqlColumns());
+
+        String CREATE_CARDS_TABLE = "CREATE  TABLE " + TABLE_NAME + "(" + mSqlColumnsGenerator.getSqlFields()+ ")";
         sqLiteDatabase.execSQL(CREATE_CARDS_TABLE);
 
-        String CREATE_FTS_CARDS_TABLE = "CREATE VIRTUAL TABLE " + FTS_TABLE_NAME + " USING fts3(" + mCardGenerator.getFTSColumns() + ");";
+        String CREATE_FTS_CARDS_TABLE = "CREATE VIRTUAL TABLE " + FTS_TABLE_NAME + " USING fts3(" + mSqlColumnsGenerator.getFTSColumns() + ");";
         sqLiteDatabase.execSQL(CREATE_FTS_CARDS_TABLE);
     }
 
@@ -107,7 +140,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
             @Override
             public void run() {
                 SQLiteDatabase database = getReadableDatabase();
-                Cursor cursor = database.query(tableName, fetchColumns, query, fetchValues, null ,null, null, null);
+                Cursor cursor = database.query(tableName, fetchColumns, query, fetchValues, null, null, null, null);
                 mCurrentCursor = cursor;
                 if (mRefreshableView != null) mRefreshableView.refreshAdapterWithCursor(cursor);
             }
@@ -141,19 +174,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
 
     }
 
-    public Cursor getCardTypes(){
-        return mTypesCursor;
-    }
-    public Cursor getCardCosts(){
-        return mCostsCursor;
-    }
-    public Cursor getCardSets(){
-        return mSetsCursor;
-    }
-    public Cursor getCardRarity(){
-        return mRarityCursor;
-    }
-
     public void resetCards(){
         mFilterBuilder.reset();
         performRawFetchWithQuery(SELECT_ALL_QUERY);
@@ -164,7 +184,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         mFilterBuilder.build();
         if (!mFilterBuilder.isEmpty()){
             mCards.clear();
-            performFetchWithQueryParameters(TABLE_NAME, mCardGenerator.getStringCardParameters(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray());
+            performFetchWithQueryParameters(TABLE_NAME, mSqlColumnsGenerator.getArrayOfSqlColumns(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray());
         }
     }
     public void resetFilters(){
@@ -239,7 +259,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
                 database.insert(FTS_TABLE_NAME, null, values);
                 Log.d("DATABASE", "Inserted card " + values.get("name"));
             }
-            database.close();
 
             mAddedCardsCount = cards.size();
 
@@ -268,7 +287,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     }
 
     public void searchCardsForQuery(String query){
-            performFetchWithQueryParameters(FTS_TABLE_NAME, mCardGenerator.getStringCardParameters(), FTS_TABLE_NAME + " MATCH ? ", new String[]{appendWildcard(query)});
+            performFetchWithQueryParameters(FTS_TABLE_NAME, mSqlColumnsGenerator.getArrayOfSqlColumns(), FTS_TABLE_NAME + " MATCH ? ", new String[]{appendWildcard(query)});
     }
 
     public static interface OnDatabaseGenerationFinished {

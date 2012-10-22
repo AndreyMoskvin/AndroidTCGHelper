@@ -34,6 +34,7 @@ public class MainActivity extends Activity{
         mApplication.getDatabaseOperator().setOnDatabaseGenerationFinished(new CardsDatabaseHelper.OnDatabaseGenerationFinished() {
             @Override
             public void databaseGenerationFinished(Boolean success, int itemsAdded) {
+                TCGHelperApplication.getInstance().getDatabaseOperator().getAllCards();
                 showCardsList.setVisibility(View.VISIBLE);
                 Toast.makeText(mApplication, "Added " + itemsAdded + " cards!", Toast.LENGTH_SHORT).show();
             }
