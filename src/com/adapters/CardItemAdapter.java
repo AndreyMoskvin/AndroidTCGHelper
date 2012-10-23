@@ -1,6 +1,5 @@
 package com.adapters;
 
-import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,16 +17,11 @@ import com.views.TCGHelperApplication;
  */
 public class CardItemAdapter extends BaseAdapter {
 
-    private Cursor mCursor;
+    private CardInfoSource mCardInfoSource;
     private LayoutInflater mLayoutInflater;
 
-    public void setCursor(Cursor cursor) {
-        this.mCursor = cursor;
-        this.notifyDataSetChanged();
-    }
-
     public CardItemAdapter(LayoutInflater inflater) {
-        this.mCursor = TCGHelperApplication.getInstance().getDatabaseOperator().getCurrentCursor();
+        this.mCardInfoSource = TCGHelperApplication.getInstance().getDatabaseOperator().getCardInfoSource();
         this.mLayoutInflater = inflater;
     }
 
@@ -40,13 +34,13 @@ public class CardItemAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return mCursor.getCount();
+        return mCardInfoSource.getCardsCount();
     }
 
     @Override
     public Object getItem(int i) {
-        mCursor.moveToPosition(i);
-        return mCursor.getInt(0);
+        mCardInfoSource.setCurrentPosition(i);
+        return mCardInfoSource.getId();
     }
 
     @Override
@@ -71,13 +65,13 @@ public class CardItemAdapter extends BaseAdapter {
             holder = (ViewHolder)convertView.getTag();
         }
 
-        mCursor.moveToPosition(i);
+        mCardInfoSource.setCurrentPosition(i);
 
-        //TODO:Remove hard-coded values
-        holder.name.setText(mCursor.getString(1));//"name"
-//        holder.cost.setText(mCursor.getString(8));//"cost"
-//        holder.type.setText(mCursor.getString(7));//"type"
-//        holder.number.setText(mCursor.getString(6));//"number"
+        //TODO:Move to interface
+        holder.name.setText(mCardInfoSource.getName());//"name"
+//        holder.cost.setText(mCardInfoSource.getString(8));//"cost"
+//        holder.type.setText(mCardInfoSource.getString(7));//"type"
+//        holder.number.setText(mCardInfoSource.getString(6));//"number"
 
         return convertView;
     }

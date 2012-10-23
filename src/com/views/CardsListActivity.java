@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,11 +26,11 @@ public class CardsListActivity extends Activity implements Refreshable{
     private ProgressBar mProgress;
 
     @Override
-    public void refreshAdapterWithCursor(final Cursor cursor) {
+    public void refreshAdapter() {
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mCardItemAdapter.setCursor(cursor);
+                mCardItemAdapter.notifyDataSetChanged();
                 mProgress.setVisibility(View.INVISIBLE);
             }
         });

@@ -1,7 +1,5 @@
 package com.views;
 
-import android.database.Cursor;
-
 /**
  * Created with IntelliJ IDEA.
  * User: andrey.moskvin
@@ -11,5 +9,5 @@ import android.database.Cursor;
  */
 public interface Refreshable {
     public void beginRefreshingActivity();
-    public void refreshAdapterWithCursor(Cursor cursor);
+    public void refreshAdapter();
 }

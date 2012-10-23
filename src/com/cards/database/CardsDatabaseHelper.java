@@ -8,10 +8,14 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
+import com.adapters.CardInfoSource;
 import com.views.Refreshable;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,8 +43,46 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     private InputStream mCsvFileStream;
 
     private Cursor mCurrentCursor;
-    public Cursor getCurrentCursor(){
-        return mCurrentCursor;
+
+    private CardInfoSource mCardInfoSource = new CardInfoSource() {
+        @Override
+        public void setCurrentPosition(int position) {
+            mCurrentCursor.moveToPosition(position);
+        }
+
+        @Override
+        public int getId() {
+            return mCurrentCursor.getInt(0);
+        }
+
+        @Override
+        public String getName() {
+            return mCurrentCursor.getString(1);
+        }
+
+        @Override
+        public String getType() {
+            return mCurrentCursor.getString(5);
+        }
+
+        @Override
+        public String getCost() {
+            return mCurrentCursor.getString(6);
+        }
+
+        @Override
+        public String getNumber() {
+            return mCurrentCursor.getString(4);
+        }
+
+        @Override
+        public int getCardsCount() {
+            return mCurrentCursor.getCount();
+        }
+    };
+
+    public CardInfoSource getCardInfoSource() {
+        return mCardInfoSource;
     }
 
     private Refreshable mRefreshableView;
@@ -49,7 +91,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     }
 
     private CardsGenerator mCardGenerator;
-    private ArrayList<Card> mCards = new ArrayList<Card>();
     private FilterBuilder mFilterBuilder;
 
     private OnDatabaseGenerationFinished mDBGenerationFinishedListener;
@@ -129,7 +170,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
                 SQLiteDatabase database = getReadableDatabase();
                 Cursor cursor = database.rawQuery(query, null, null);
                 mCurrentCursor = cursor;
-                if (mRefreshableView != null) mRefreshableView.refreshAdapterWithCursor(cursor);
+                if (mRefreshableView != null) mRefreshableView.refreshAdapter();
             }
         });
     }
@@ -142,7 +183,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
                 SQLiteDatabase database = getReadableDatabase();
                 Cursor cursor = database.query(tableName, fetchColumns, query, fetchValues, null, null, null, null);
                 mCurrentCursor = cursor;
-                if (mRefreshableView != null) mRefreshableView.refreshAdapterWithCursor(cursor);
+                if (mRefreshableView != null) mRefreshableView.refreshAdapter();
             }
         });
     }
@@ -183,7 +224,6 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         mFilterBuilder.addFilters(key, value);
         mFilterBuilder.build();
         if (!mFilterBuilder.isEmpty()){
-            mCards.clear();
             performFetchWithQueryParameters(TABLE_NAME, mSqlColumnsGenerator.getArrayOfSqlColumns(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray());
         }
     }
