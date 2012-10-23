@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.*;
 import com.cards.database.CardsDatabaseHelper;
 
+import java.util.ArrayList;
+
 /**
  * Created with IntelliJ IDEA.
  * User: andrey.moskvin
@@ -81,6 +83,7 @@ public class FilterActivity extends Activity implements AdapterView.OnItemSelect
 
     private class FilterAdapter extends BaseAdapter {
         private Cursor mCursor;
+        private ArrayList<String> mFilters;
 
         private class ViewHolder {
             public TextView text;
@@ -88,17 +91,22 @@ public class FilterActivity extends Activity implements AdapterView.OnItemSelect
 
         private FilterAdapter(Cursor mCursor) {
             this.mCursor = mCursor;
+            mFilters = new ArrayList<String>();
+            mFilters.add("All");
+            this.mCursor.moveToFirst();
+            do{
+                mFilters.add(mCursor.getString(0));
+            } while (this.mCursor.moveToNext());
         }
 
         @Override
         public int getCount() {
-            return mCursor.getCount();
+            return mFilters.size();
         }
 
         @Override
         public Object getItem(int position) {
-            mCursor.moveToPosition(position);
-            return mCursor.getString(0);
+            return mFilters.get(position);
         }
 
         @Override
@@ -120,9 +128,7 @@ public class FilterActivity extends Activity implements AdapterView.OnItemSelect
                 holder = (ViewHolder)view.getTag();
             }
 
-            mCursor.moveToPosition(position);
-
-            holder.text.setText(mCursor.getString(0));
+            holder.text.setText(mFilters.get(position));
 
             return view;
         }

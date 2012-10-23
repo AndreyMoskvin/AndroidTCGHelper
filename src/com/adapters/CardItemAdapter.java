@@ -67,11 +67,10 @@ public class CardItemAdapter extends BaseAdapter {
 
         mCardInfoSource.setCurrentPosition(i);
 
-        //TODO:Move to interface
-        holder.name.setText(mCardInfoSource.getName());//"name"
-//        holder.cost.setText(mCardInfoSource.getString(8));//"cost"
-//        holder.type.setText(mCardInfoSource.getString(7));//"type"
-//        holder.number.setText(mCardInfoSource.getString(6));//"number"
+        holder.name.setText(mCardInfoSource.getName());
+        holder.cost.setText(mCardInfoSource.getCost());
+        holder.type.setText(mCardInfoSource.getType());
+        holder.number.setText(mCardInfoSource.getNumber());
 
         return convertView;
     }

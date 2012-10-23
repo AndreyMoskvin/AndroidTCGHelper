@@ -62,17 +62,18 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
 
         @Override
         public String getType() {
-            return mCurrentCursor.getString(5);
+            return mCurrentCursor.getString(7);
         }
 
         @Override
+
         public String getCost() {
-            return mCurrentCursor.getString(6);
+            return mCurrentCursor.getString(8);
         }
 
         @Override
         public String getNumber() {
-            return mCurrentCursor.getString(4);
+            return mCurrentCursor.getString(6);
         }
 
         @Override
