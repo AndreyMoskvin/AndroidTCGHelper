@@ -254,8 +254,11 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
         }
 
         public void addFilters(String key, String value){
-            if (!value.equals(FILTER_ALL))
+            if (!value.equals(FILTER_ALL)){
                 mFilters.put(key, value);
+            } else {
+                mFilters.remove(key);
+            }
         }
 
         public void build(){

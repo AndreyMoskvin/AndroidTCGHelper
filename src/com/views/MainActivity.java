@@ -25,7 +25,7 @@ public class MainActivity extends Activity{
 
         InputStream stream;
         try {
-            stream = getAssets().open("MyDatabase.csv");
+            stream = getAssets().open("csv/MyDatabase.csv");
             mApplication.setCardsDatabaseHelper(new CardsDatabaseHelper(this, stream));
         } catch (IOException e) {
             e.printStackTrace();
@@ -56,9 +56,9 @@ public class MainActivity extends Activity{
     }
 
     public void openListActivity(View view){
-
         Intent intent = new Intent(this, CardsListActivity.class);
         startActivity(intent);
+        overridePendingTransition(R.anim.fade, R.anim.hold);
     }
 
     private void generateDatabase(){

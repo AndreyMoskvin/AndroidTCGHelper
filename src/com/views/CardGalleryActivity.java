@@ -33,7 +33,7 @@ public class CardGalleryActivity extends Activity {
         setContentView(R.layout.gallery);
 
         try {
-           mCardImages = getAssets().list("");
+           mCardImages = getAssets().list("images/");
         } catch (IOException e) {
             e.printStackTrace();
         }

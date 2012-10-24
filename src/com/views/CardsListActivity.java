@@ -132,6 +132,7 @@ public class CardsListActivity extends Activity implements Refreshable{
                 Intent intent = new Intent(this, FilterActivity.class);
                 intent.putExtra(FilterActivity.FILTERS, mFilters);
                 startActivityForResult(intent, 10);
+                overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit);
                 return true;
             case R.id.menuSearchButton:
 //                refreshAdapter();

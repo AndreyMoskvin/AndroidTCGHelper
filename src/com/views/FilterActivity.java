@@ -85,6 +85,11 @@ public class FilterActivity extends Activity implements AdapterView.OnItemSelect
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
     protected void onStop() {
         setResult(Activity.RESULT_CANCELED);
         super.onStop();
