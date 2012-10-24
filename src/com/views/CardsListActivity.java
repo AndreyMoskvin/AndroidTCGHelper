@@ -12,6 +12,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.SearchView;
 import com.adapters.CardItemAdapter;
+import com.cards.database.CardsDatabaseHelper;
+
+import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,6 +27,7 @@ public class CardsListActivity extends Activity implements Refreshable{
 
     private CardItemAdapter mCardItemAdapter;
     private ProgressBar mProgress;
+    private HashMap<String, Integer> mFilters;
 
     @Override
     public void refreshAdapter() {
@@ -52,6 +56,13 @@ public class CardsListActivity extends Activity implements Refreshable{
         setContentView(R.layout.card_list);
 
         mProgress = (ProgressBar)findViewById(R.id.listProgressBar);
+        if (mFilters == null){
+            mFilters = new HashMap<String, Integer>();
+            mFilters.put(CardsDatabaseHelper.KEY_TYPE, 0);
+            mFilters.put(CardsDatabaseHelper.KEY_COST, 0);
+            mFilters.put(CardsDatabaseHelper.KEY_SET, 0);
+            mFilters.put(CardsDatabaseHelper.KEY_RARITY, 0);
+        }
 
         TCGHelperApplication.getInstance().getDatabaseOperator().setRefreshableView(this);
 
@@ -119,12 +130,20 @@ public class CardsListActivity extends Activity implements Refreshable{
         switch (item.getItemId()) {
             case R.id.menuFilterOptionsButton:
                 Intent intent = new Intent(this, FilterActivity.class);
-                startActivity(intent);
+                intent.putExtra(FilterActivity.FILTERS, mFilters);
+                startActivityForResult(intent, 10);
                 return true;
             case R.id.menuSearchButton:
 //                refreshAdapter();
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            mFilters = (HashMap<String, Integer>) data.getSerializableExtra(FilterActivity.FILTERS);
         }
     }
 }

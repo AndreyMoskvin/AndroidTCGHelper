@@ -9,6 +9,7 @@ import android.widget.*;
 import com.cards.database.CardsDatabaseHelper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,10 +20,16 @@ import java.util.ArrayList;
  */
 public class FilterActivity extends Activity implements AdapterView.OnItemSelectedListener{
 
+    public final static String FILTERS = "filters";
+
+    private HashMap<String, Integer> mSelectedFilters;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.filter);
+
+        mSelectedFilters = (HashMap<String, Integer>) getIntent().getSerializableExtra(FILTERS);
 
         Cursor types = TCGHelperApplication.getInstance().getDatabaseOperator().getCardTypes();
         Cursor costs = TCGHelperApplication.getInstance().getDatabaseOperator().getCardCosts();
@@ -31,37 +38,44 @@ public class FilterActivity extends Activity implements AdapterView.OnItemSelect
 
         Spinner typeSpinner = (Spinner)findViewById(R.id.filterTypeSpinner);
         typeSpinner.setTag(CardsDatabaseHelper.KEY_TYPE);
-        typeSpinner.setOnItemSelectedListener(this);
 
         FilterAdapter typesAdapter = new FilterAdapter(types);
         typeSpinner.setAdapter(typesAdapter);
+        typeSpinner.setSelection(mSelectedFilters.get(CardsDatabaseHelper.KEY_TYPE), true);
+        typeSpinner.setOnItemSelectedListener(this);
 
         Spinner costSpinner = (Spinner)findViewById(R.id.filterCostSpinner);
         costSpinner.setTag(CardsDatabaseHelper.KEY_COST);
-        costSpinner.setOnItemSelectedListener(this);
 
         FilterAdapter costAdapter = new FilterAdapter(costs);
         costSpinner.setAdapter(costAdapter);
+        costSpinner.setSelection(mSelectedFilters.get(CardsDatabaseHelper.KEY_COST));
+        costSpinner.setOnItemSelectedListener(this);
 
         Spinner setSpinner = (Spinner)findViewById(R.id.filterSetSpinner);
         setSpinner.setTag(CardsDatabaseHelper.KEY_SET);
-        setSpinner.setOnItemSelectedListener(this);
 
         FilterAdapter setsAdapter = new FilterAdapter(sets);
         setSpinner.setAdapter(setsAdapter);
+        setSpinner.setSelection(mSelectedFilters.get(CardsDatabaseHelper.KEY_SET));
+        setSpinner.setOnItemSelectedListener(this);
 
         Spinner raritySpinner = (Spinner)findViewById(R.id.filterRaritySpinner);
         raritySpinner.setTag(CardsDatabaseHelper.KEY_RARITY);
-        raritySpinner.setOnItemSelectedListener(this);
 
         FilterAdapter rarityAdapter = new FilterAdapter(rarity);
         raritySpinner.setAdapter(rarityAdapter);
+        raritySpinner.setSelection(mSelectedFilters.get(CardsDatabaseHelper.KEY_RARITY));
+        raritySpinner.setOnItemSelectedListener(this);
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
         String selectedFilter = (String) adapterView.getItemAtPosition(i);
         String filterType = (String) adapterView.getTag();
+
+        mSelectedFilters.put(filterType, i);
+        getIntent().putExtra(FILTERS, mSelectedFilters);
 
         TCGHelperApplication.getInstance().getDatabaseOperator().addFilter(filterType, selectedFilter);
     }
