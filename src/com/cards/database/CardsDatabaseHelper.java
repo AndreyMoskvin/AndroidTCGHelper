@@ -169,7 +169,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
             @Override
             public void run() {
                 SQLiteDatabase database = getReadableDatabase();
-                Cursor cursor = database.rawQuery(query, null, null);
+                Cursor cursor = database.rawQuery(query, null);
                 mCurrentCursor = cursor;
                 if (mRefreshableView != null) mRefreshableView.refreshAdapter();
             }
@@ -190,7 +190,7 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     }
 
     private Cursor extractFilterValuesForColumn(SQLiteDatabase database, final String column){
-        return database.rawQuery("SELECT DISTINCT " + column + " FROM " + TABLE_NAME, null, null);
+        return database.rawQuery("SELECT DISTINCT " + column + " FROM " + TABLE_NAME, null);
     }
 
     public boolean hasData(){

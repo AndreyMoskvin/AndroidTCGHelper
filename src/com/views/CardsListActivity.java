@@ -2,17 +2,17 @@ package com.views;
 
 import android.app.Activity;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.adapters.CardItemAdapter;
 import com.cards.database.CardsDatabaseHelper;
+import com.devspark.collapsiblesearchmenu.CollapsibleMenuUtils;
 
 import java.util.HashMap;
 
@@ -23,7 +23,7 @@ import java.util.HashMap;
  * Time: 9:30 AM
  * To change this template use File | Settings | File Templates.
  */
-public class CardsListActivity extends Activity implements Refreshable{
+public class CardsListActivity extends SherlockActivity implements Refreshable{
 
     private CardItemAdapter mCardItemAdapter;
     private ProgressBar mProgress;
@@ -84,38 +84,29 @@ public class CardsListActivity extends Activity implements Refreshable{
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.list_menu, menu);
+    public boolean onCreatePanelMenu(int featureId, com.actionbarsherlock.view.Menu menu) {
+        getSupportMenuInflater().inflate(R.menu.list_menu, menu);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.menuSearchButton).getActionView();
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        CollapsibleMenuUtils.addSearchMenuItem(menu, false, new TextWatcher() {
             @Override
-            public boolean onQueryTextSubmit(String newText) {
-                return false;
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
             @Override
-            public boolean onQueryTextChange(String query) {
-                if (!query.isEmpty()) {
-                    updateWithQuery(query);
+            public void onTextChanged(CharSequence sequence, int start, int before, int count) {
+                if (!sequence.toString().isEmpty()) {
+                    updateWithQuery(sequence.toString());
                 } else {
                     TCGHelperApplication.getInstance().getDatabaseOperator().resetCards();
                 }
-                return true;
             }
-        });
-        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-        searchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-               if (!hasFocus){
-                    TCGHelperApplication.getInstance().getDatabaseOperator().resetCards();
-                }
+            public void afterTextChanged(Editable s) {
             }
         });
 
-        return super.onCreateOptionsMenu(menu);
+        return super.onCreatePanelMenu(featureId, menu);
     }
 
     private void handleIntent(Intent intent) {
@@ -126,7 +117,7 @@ public class CardsListActivity extends Activity implements Refreshable{
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemSelected(int featureId, com.actionbarsherlock.view.MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menuFilterOptionsButton:
                 Intent intent = new Intent(this, FilterActivity.class);
@@ -134,10 +125,8 @@ public class CardsListActivity extends Activity implements Refreshable{
                 startActivityForResult(intent, 10);
                 overridePendingTransition(R.anim.zoom_enter, R.anim.zoom_exit);
                 return true;
-            case R.id.menuSearchButton:
-//                refreshAdapter();
             default:
-                return super.onOptionsItemSelected(item);
+                return super.onMenuItemSelected(featureId, item);
         }
     }
 

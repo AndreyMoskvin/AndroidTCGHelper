@@ -1,14 +1,16 @@
 package com.views;
 
-import android.app.Activity;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import com.actionbarsherlock.app.SherlockActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,7 +24,7 @@ import static android.graphics.BitmapFactory.decodeStream;
  * Time: 11:46 AM
  * To change this template use File | Settings | File Templates.
  */
-public class CardGalleryActivity extends Activity {
+public class CardGalleryActivity extends SherlockActivity {
 
     private ViewPager mPager;
     private String[] mCardImages;
@@ -33,7 +35,7 @@ public class CardGalleryActivity extends Activity {
         setContentView(R.layout.gallery);
 
         try {
-           mCardImages = getAssets().list("images/");
+           mCardImages = getAssets().list("images");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -43,12 +45,11 @@ public class CardGalleryActivity extends Activity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+    public boolean onCreatePanelMenu(int featureId, com.actionbarsherlock.view.Menu menu) {
+        com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
         inflater.inflate(R.menu.gallery_menu, menu);
-        return true;
+        return super.onCreatePanelMenu(featureId, menu);
     }
-
 
     @Override
     public boolean onMenuItemSelected(int featureId, MenuItem item) {
@@ -103,7 +104,7 @@ public class CardGalleryActivity extends Activity {
 
             String currentImage = mCardImages[i];
             try {
-                imageView.setImageBitmap(getBitmapFromAsset(currentImage));
+                imageView.setImageBitmap(getBitmapFromAsset("images/" + currentImage));
             } catch (IOException e) {
                 e.printStackTrace();
             }

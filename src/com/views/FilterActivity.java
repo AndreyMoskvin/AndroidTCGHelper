@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.cards.database.CardsDatabaseHelper;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.HashMap;
  * Time: 11:10 AM
  * To change this template use File | Settings | File Templates.
  */
-public class FilterActivity extends Activity implements AdapterView.OnItemSelectedListener{
+public class FilterActivity extends SherlockActivity implements AdapterView.OnItemSelectedListener{
 
     public final static String FILTERS = "filters";
 

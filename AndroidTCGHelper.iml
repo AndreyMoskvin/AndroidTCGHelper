@@ -40,8 +40,18 @@
     <orderEntry type="jdk" jdkName="Android 4.1 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="universal-image-loader-1.6.1" level="project" />
-    <orderEntry type="library" name="android-support-v4" level="project" />
     <orderEntry type="library" name="opencsv-2.3" level="project" />
+    <orderEntry type="module" module-name="ActionBarSherlock" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/ActionBarSherlock/libs/android-support-v4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module" module-name="SearchView" />
   </component>
 </module>
 
