@@ -40,7 +40,7 @@ public class CardItemAdapter extends BaseAdapter {
     @Override
     public Object getItem(int i) {
         mCardInfoSource.setCurrentPosition(i);
-        return mCardInfoSource.getId();
+        return mCardInfoSource;
     }
 
     @Override

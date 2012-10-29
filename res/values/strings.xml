@@ -19,4 +19,5 @@
     <string name="cardTypeLabelStubText">Type</string>
     <string name="cardTypeLabelCostStubText">Cost</string>
     <string name="cardNumberLabelStubText">Number</string>
+    <string name="cardImageUrlKey">IMAGE_URL</string>
 </resources>

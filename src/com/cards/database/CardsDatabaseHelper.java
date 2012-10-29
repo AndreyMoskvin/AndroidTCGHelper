@@ -224,12 +224,15 @@ public class CardsDatabaseHelper extends SQLiteOpenHelper{
     public void addFilter(String key, String value){
         mFilterBuilder.addFilters(key, value);
         mFilterBuilder.build();
-        if (!mFilterBuilder.isEmpty()){
-            performFetchWithQueryParameters(TABLE_NAME, mSqlColumnsGenerator.getArrayOfSqlColumns(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray());
-        }
     }
     public void resetFilters(){
         mFilterBuilder.reset();
+    }
+
+    public void applyFilters() {
+        if (!mFilterBuilder.isEmpty()){
+            performFetchWithQueryParameters(TABLE_NAME, mSqlColumnsGenerator.getArrayOfSqlColumns(), mFilterBuilder.getFilterString(), mFilterBuilder.getSqlFilterValuesArray());
+        }
     }
 
     private class FilterBuilder{

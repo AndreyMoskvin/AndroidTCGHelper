@@ -33,5 +33,8 @@
         <activity android:name=".FilterActivity"
                   android:screenOrientation="portrait"
                   android:theme="@style/MyTheme"/>
+        <activity android:name=".CardsImageGalleryActivity"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/MyTheme"/>
     </application>
 </manifest>

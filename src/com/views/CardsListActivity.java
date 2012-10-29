@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import com.actionbarsherlock.app.SherlockActivity;
+import com.adapters.CardInfoSource;
 import com.adapters.CardItemAdapter;
 import com.cards.database.CardsDatabaseHelper;
 import com.devspark.collapsiblesearchmenu.CollapsibleMenuUtils;
@@ -57,6 +59,7 @@ public class CardsListActivity extends SherlockActivity implements Refreshable{
 
         mProgress = (ProgressBar)findViewById(R.id.listProgressBar);
         if (mFilters == null){
+            TCGHelperApplication.getInstance().getDatabaseOperator().resetFilters();
             mFilters = new HashMap<String, Integer>();
             mFilters.put(CardsDatabaseHelper.KEY_TYPE, 0);
             mFilters.put(CardsDatabaseHelper.KEY_COST, 0);
@@ -69,6 +72,14 @@ public class CardsListActivity extends SherlockActivity implements Refreshable{
         ListView listView = (ListView)findViewById(R.id.cardListView);
         mCardItemAdapter = new CardItemAdapter(getLayoutInflater());
         listView.setAdapter(mCardItemAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                CardInfoSource source = (CardInfoSource) mCardItemAdapter.getItem(position);
+                String name =  source.getName();
+                openCardDetailIntent(name);
+            }
+        });
 
         handleIntent(getIntent());
     }
@@ -77,6 +88,16 @@ public class CardsListActivity extends SherlockActivity implements Refreshable{
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         handleIntent(intent);
+    }
+
+    private void openCardDetailIntent(String cardName){
+        Intent intent = new Intent(this, CardsImageGalleryActivity.class);
+
+        String escapedCardName = cardName.toLowerCase().replace(" ","_").replace("'","").replace(",","").replace("-","");
+
+        String imageLoadUrl = "http://www.tcgbrowser.com/images/cards/hd/" + escapedCardName + ".jpg";
+        intent.putExtra(getString(R.string.cardImageUrlKey), imageLoadUrl);
+        startActivity(intent);
     }
 
     private void updateWithQuery(String query){
@@ -134,6 +155,7 @@ public class CardsListActivity extends SherlockActivity implements Refreshable{
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
             mFilters = (HashMap<String, Integer>) data.getSerializableExtra(FilterActivity.FILTERS);
+            TCGHelperApplication.getInstance().getDatabaseOperator().applyFilters();
         }
     }
 }
